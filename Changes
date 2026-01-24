@@ -2,6 +2,11 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.12 2026-01-24T05:21:15Z
+
+    - Search Homebrew libexec paths for Perl modules.
+    - Add GitHub Actions workflow to create releases on tag push.
+
 0.11 2026-01-24T04:45:36Z
 
     - Add Homebrew wrapper resolution to show actual scripts.
