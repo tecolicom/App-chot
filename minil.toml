@@ -11,4 +11,3 @@ exclude_match = ['^CLAUDE\.md$']
 [release]
 branch = "main"
 do_not_upload_to_cpan = true
-github_release = true
