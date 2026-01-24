@@ -2,6 +2,12 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.11 2026-01-24T04:45:36Z
+
+    - Add Homebrew wrapper resolution to show actual scripts.
+    - Make Inline::Python optional with dynamic loading.
+    - Enable GitHub release on minil release.
+
 0.10 2025-10-30T07:29:29Z
 
     - Add --version/-v option to display version information.
