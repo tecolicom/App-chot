@@ -3,22 +3,29 @@ package App::lms::Python;
 use v5.14;
 use warnings;
 
+my $PYTHON_AVAILABLE;
+
 sub get_path {
     my($app, $name) = @_;
+    return unless _init_python();
     getsourcefile($name);
 }
 
-my $DIR;
-BEGIN {
-    $DIR = "$ENV{HOME}/.Inline";
-    unless (-d $DIR) {
-	mkdir $DIR || die "$!";
-	warn "Make $DIR directory.\n";
-    }
-}
+sub _init_python {
+    return $PYTHON_AVAILABLE if defined $PYTHON_AVAILABLE;
 
-use Inline Config => directory => $DIR;
-use Inline Python => <<'END';
+    my $dir = "$ENV{HOME}/.Inline";
+    unless (-d $dir) {
+        mkdir $dir or do {
+            warn "Cannot create $dir: $!\n";
+            return $PYTHON_AVAILABLE = 0;
+        };
+    }
+
+    eval {
+        require Inline;
+        Inline->import(Config => directory => $dir);
+        Inline->import(Python => <<'END');
 
 import re
 import inspect
@@ -43,5 +50,13 @@ def find_module_file(module_name):
     return None
 
 END
+        1;
+    } or do {
+        # Inline::Python not available, silently disable Python support
+        return $PYTHON_AVAILABLE = 0;
+    };
+
+    $PYTHON_AVAILABLE = 1;
+}
 
 1;
