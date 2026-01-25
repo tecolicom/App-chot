@@ -17,7 +17,9 @@ use Text::ParseWords qw(shellwords);
 use Getopt::EX::Hashed; {
     Getopt::EX::Hashed->configure(DEFAULT => [ is => 'rw' ]);
     has debug   => '       ' ;
+    has help    => ' h     ' , action => sub { pod2usage(-verbose => 1) } ;
     has list    => ' l +   ' ;
+    has man     => ' m     ' ;
     has version => ' v     ' , action => sub { say "Version: $VERSION"; exit } ;
     has pager   => ' p =s  ' ;
     has suffix  => '   =s  ' , default => [ qw( .pm ) ] ;
@@ -36,24 +38,34 @@ sub run {
     Configure qw(bundling no_getopt_compat);
     $app->getopt || pod2usage();
 
-    my $name = pop @ARGV // pod2usage();
+    my $name = pop @ARGV;
+    if (!defined $name) {
+	if ($app->man) {
+	    my $script = $ENV{LMS_SCRIPT_PATH} // $0;
+	    exec 'perldoc', $script;
+	    die "perldoc: $!\n";
+	}
+	pod2usage();
+    }
     my @option = splice @ARGV;
     my $pager = $app->pager || $ENV{'PAGER'} || 'less';
 
-    my @found = do {
-	grep { defined }
-	map {
-	    no strict 'refs';
-	    if (eval "require $_") {
-		&{"$_\::get_path"}($app, $name);
-	    } else {
-		warn $@;
-		();
+    my @found;
+    my $found_type;
+    for my $type (split /:+/, $app->type) {
+	my $handler = __PACKAGE__ . '::' . $type;
+	no strict 'refs';
+	if (eval "require $handler") {
+	    my @paths = grep { defined } &{"$handler\::get_path"}($app, $name);
+	    if (@paths) {
+		@found = @paths;
+		$found_type = $type;
+		last;
 	    }
+	} else {
+	    warn $@;
 	}
-	map { __PACKAGE__ . '::' . $_ }
-	split /:+/, $app->type;
-    };
+    }
 
     if (not @found) {
 	warn "$name: Nothing found.\n";
@@ -67,6 +79,17 @@ sub run {
 	    say for @found;
 	}
 	return 0;
+    }
+
+    if ($app->man) {
+	if ($found_type eq 'Perl') {
+	    exec 'perldoc', '-F', $found[0];
+	} elsif ($found_type eq 'Python') {
+	    exec 'python3', '-m', 'pydoc', $name;
+	} elsif ($found_type eq 'Command') {
+	    exec 'man', $name;
+	}
+	die "$found_type man: $!\n";
     }
 
     @found = grep {

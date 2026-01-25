@@ -52,10 +52,21 @@ and displays the first match found using a pager.
 
 =over 7
 
+=item B<-h>, B<--help>
+
+Display this help message and exit.
+
 =item B<-l>, B<--list>
 
 Print module path instead of displaying the file contents.
 Use multiple times (C<-ll>) to call C<ls -l> for detailed file information.
+
+=item B<-m>, B<--man>
+
+Display manual/documentation using the appropriate tool for each language:
+- Perl: C<perldoc>
+- Python: C<pydoc>
+- Command: C<man>
 
 =item B<-v>, B<--version>
 
@@ -150,6 +161,11 @@ Automatically created on first use when accessing Python libraries.
 
     # Show detailed file information
     lms -ll Getopt::EX::Long
+
+    # Show documentation (perldoc for Perl, pydoc for Python, man for commands)
+    lms -m App::Greple
+    lms -m os.path
+    lms -m ls
 
     # Only search for Perl modules
     lms --type Perl Data::Dumper

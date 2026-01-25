@@ -2,61 +2,42 @@ package App::lms::Python;
 
 use v5.14;
 use warnings;
+use Command::Run;
 
-my $PYTHON_AVAILABLE;
+my $PYTHON;
 
 sub get_path {
     my($app, $name) = @_;
-    return unless _init_python();
-    getsourcefile($name);
+    my $python = _find_python() or return;
+
+    # Validate module name (only allow word chars and dots)
+    return if $name =~ /[^\w\.]/;
+
+    my $code = <<"END";
+import inspect
+try:
+    exec('import $name')
+    path = inspect.getsourcefile(eval('$name'))
+    if path:
+        print(path)
+except:
+    pass
+END
+
+    my $path = Command::Run->new->command($python, '-c', $code)->update->data // return;
+    chomp $path;
+    return $path if $path && -f $path;
+    return;
 }
 
-sub _init_python {
-    return $PYTHON_AVAILABLE if defined $PYTHON_AVAILABLE;
+sub _find_python {
+    return $PYTHON if defined $PYTHON;
 
-    my $dir = "$ENV{HOME}/.Inline";
-    unless (-d $dir) {
-        mkdir $dir or do {
-            warn "Cannot create $dir: $!\n";
-            return $PYTHON_AVAILABLE = 0;
-        };
+    for my $cmd (qw(python3 python)) {
+        Command::Run->new->command('which', $cmd)->update->data
+            and return $PYTHON = $cmd;
     }
-
-    eval {
-        require Inline;
-        Inline->import(Config => directory => $dir);
-        Inline->import(Python => <<'END');
-
-import re
-import inspect
-
-def getsourcefile(name):
-    if re.search(r'[^\w\.]', name):
-        return
-    try:
-        exec('import ' + name)
-    except:
-        return
-    return inspect.getsourcefile(eval(name))
-
-import os
-import sys
-
-def find_module_file(module_name):
-    for path in sys.path:
-        file_path = os.path.join(path, module_name.replace('.', os.sep) + ".py")
-        if os.path.isfile(file_path):
-            return file_path
-    return None
-
-END
-        1;
-    } or do {
-        # Inline::Python not available, silently disable Python support
-        return $PYTHON_AVAILABLE = 0;
-    };
-
-    $PYTHON_AVAILABLE = 1;
+    return $PYTHON = '';
 }
 
 1;
