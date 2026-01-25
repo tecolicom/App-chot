@@ -2,6 +2,13 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.15 2026-01-25T11:26:13Z
+
+    - Add --py option as shortcut for --type Python.
+    - Add --pl option as shortcut for --type Perl.
+    - Make --type handler names case-insensitive.
+    - Update documentation with practical examples.
+
 0.14 2026-01-25T03:03:01Z
 
     - Find alternative file when __init__.py is empty.
