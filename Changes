@@ -2,6 +2,21 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.13 2026-01-25T02:41:43Z
+
+    - Replace Inline::Python with direct Python execution.
+    - Add --help/-h option to display brief usage.
+    - Add --man/-m option to show documentation (perldoc/pydoc/man).
+    - Add -d/--debug option to show handler search process.
+    - Add -n/--dryrun option to show command without executing.
+    - Add -r/--raw option to skip wrapper resolution.
+    - Add -1/--one option to stop at first match.
+    - Change default behavior to search all handlers and show all files.
+    - Use bat as default pager if available.
+    - Support LMS_PAGER environment variable.
+    - Show both wrapper and resolved path for Homebrew commands.
+    - Refactor language-specific code into handler modules.
+
 0.12 2026-01-24T05:21:15Z
 
     - Search Homebrew libexec paths for Perl modules.
