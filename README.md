@@ -41,10 +41,40 @@ and displays the first match found using a pager.
 
 # OPTIONS
 
+- **-a**, **--all**
+
+    Search all handlers and show all matching files, instead of stopping
+    at the first match. Also implies `--raw` to show unresolved paths.
+
+- **-d**, **--debug**
+
+    Show debug output on stderr. Displays which handlers are tried
+    and how paths are resolved.
+
+- **-n**, **--dryrun**
+
+    Show the command that would be executed without actually running it.
+
+- **-h**, **--help**
+
+    Display this help message and exit.
+
 - **-l**, **--list**
 
     Print module path instead of displaying the file contents.
     Use multiple times (`-ll`) to call `ls -l` for detailed file information.
+
+- **-m**, **--man**
+
+    Display manual/documentation using the appropriate tool for each language:
+    \- Perl: `perldoc`
+    \- Python: `pydoc`
+    \- Command: `man`
+
+- **-r**, **--raw**
+
+    Show raw paths without resolving Homebrew wrapper scripts or
+    rejecting pyenv shims.
 
 - **-v**, **--version**
 
@@ -129,6 +159,11 @@ implement a `get_path($app, $name)` method.
 
     # Show detailed file information
     lms -ll Getopt::EX::Long
+
+    # Show documentation (perldoc for Perl, pydoc for Python, man for commands)
+    lms -m App::Greple
+    lms -m os.path
+    lms -m ls
 
     # Only search for Perl modules
     lms --type Perl Data::Dumper

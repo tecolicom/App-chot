@@ -41,11 +41,8 @@
          }
       },
       "runtime" : {
-         "recommends" : {
-            "Inline" : "0",
-            "Inline::Python" : "0"
-         },
          "requires" : {
+            "Command::Run" : "0",
             "Encode" : "0",
             "Getopt::EX::Hashed" : "1.05",
             "Getopt::EX::Long" : "0",

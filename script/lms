@@ -52,6 +52,20 @@ and displays the first match found using a pager.
 
 =over 7
 
+=item B<-a>, B<--all>
+
+Search all handlers and show all matching files, instead of stopping
+at the first match. Also implies C<--raw> to show unresolved paths.
+
+=item B<-d>, B<--debug>
+
+Show debug output on stderr. Displays which handlers are tried
+and how paths are resolved.
+
+=item B<-n>, B<--dryrun>
+
+Show the command that would be executed without actually running it.
+
 =item B<-h>, B<--help>
 
 Display this help message and exit.
@@ -67,6 +81,11 @@ Display manual/documentation using the appropriate tool for each language:
 - Perl: C<perldoc>
 - Python: C<pydoc>
 - Command: C<man>
+
+=item B<-r>, B<--raw>
+
+Show raw paths without resolving Homebrew wrapper scripts or
+rejecting pyenv shims.
 
 =item B<-v>, B<--version>
 

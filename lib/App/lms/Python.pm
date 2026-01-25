@@ -5,10 +5,16 @@ use warnings;
 use Command::Run;
 
 my $PYTHON;
+my $DEBUG;
 
 sub get_path {
     my($app, $name) = @_;
-    my $python = _find_python() or return;
+    $DEBUG = $app->debug;
+    my $python = _find_python() or do {
+        warn "  Python not found\n" if $DEBUG;
+        return;
+    };
+    warn "  Using: $python\n" if $DEBUG;
 
     # Validate module name (only allow word chars and dots)
     return if $name =~ /[^\w\.]/;
@@ -26,7 +32,10 @@ END
 
     my $path = Command::Run->new->command($python, '-c', $code)->update->data // return;
     chomp $path;
-    return $path if $path && -f $path;
+    if ($path && -f $path) {
+        warn "  Found: $path\n" if $DEBUG;
+        return $path;
+    }
     return;
 }
 

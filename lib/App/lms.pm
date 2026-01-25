@@ -16,7 +16,10 @@ use Text::ParseWords qw(shellwords);
 
 use Getopt::EX::Hashed; {
     Getopt::EX::Hashed->configure(DEFAULT => [ is => 'rw' ]);
-    has debug   => '       ' ;
+    has all     => ' a     ' ;
+    has debug   => ' d +   ' ;
+    has dryrun  => ' n     ' ;
+    has raw     => ' r     ' ;
     has help    => ' h     ' , action => sub { pod2usage(-verbose => 1) } ;
     has list    => ' l +   ' ;
     has man     => ' m     ' ;
@@ -54,13 +57,17 @@ sub run {
     my $found_type;
     for my $type (split /:+/, $app->type) {
 	my $handler = __PACKAGE__ . '::' . $type;
+	warn "Trying handler: $type\n" if $app->debug;
 	no strict 'refs';
 	if (eval "require $handler") {
 	    my @paths = grep { defined } &{"$handler\::get_path"}($app, $name);
 	    if (@paths) {
-		@found = @paths;
-		$found_type = $type;
-		last;
+		warn "Found by $type: @paths\n" if $app->debug;
+		push @found, @paths;
+		$found_type //= $type;
+		last unless $app->all;
+	    } else {
+		warn "Not found by $type\n" if $app->debug;
 	    }
 	} else {
 	    warn $@;
@@ -82,13 +89,19 @@ sub run {
     }
 
     if ($app->man) {
+	my @cmd;
 	if ($found_type eq 'Perl') {
-	    exec 'perldoc', '-F', $found[0];
+	    @cmd = ('perldoc', '-F', $found[0]);
 	} elsif ($found_type eq 'Python') {
-	    exec 'python3', '-m', 'pydoc', $name;
+	    @cmd = ('python3', '-m', 'pydoc', $name);
 	} elsif ($found_type eq 'Command') {
-	    exec 'man', $name;
+	    @cmd = ('man', $name);
 	}
+	if ($app->dryrun) {
+	    say "@cmd";
+	    return 0;
+	}
+	exec @cmd;
 	die "$found_type man: $!\n";
     }
 
@@ -99,7 +112,12 @@ sub run {
 	}
     } @found or return 0;
 
-    exec shellwords($pager), @option, @found;
+    my @cmd = (shellwords($pager), @option, @found);
+    if ($app->dryrun) {
+	say "@cmd";
+	return 0;
+    }
+    exec @cmd;
     die "$pager: $!\n";
 }
 
