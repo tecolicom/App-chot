@@ -39,8 +39,52 @@ END
     chomp $path;
     if ($path && -f $path) {
         warn "  Found: $path\n" if $DEBUG;
+        # If __init__.py is empty, look for alternative files
+        if ($path =~ m{/__init__\.py$} && -z $path) {
+            warn "  Empty __init__.py, searching alternatives\n" if $DEBUG;
+            if (my $alt = _find_alternative($path, $name)) {
+                warn "  Alternative: $alt\n" if $DEBUG;
+                return $alt;
+            }
+        }
         return $path;
     }
+    return;
+}
+
+sub _find_alternative {
+    my($init_path, $name) = @_;
+    my $dir = $init_path;
+    $dir =~ s{/__init__\.py$}{};
+
+    # Get base module name (last component)
+    my $base = $name;
+    $base =~ s/.*\.//;
+
+    # Search order: same-name module, __main__.py, other .py files
+    my @candidates = (
+        "$dir/$base.py",
+        "$dir/__main__.py",
+    );
+
+    for my $candidate (@candidates) {
+        if (-f $candidate && -s $candidate) {
+            return $candidate;
+        }
+    }
+
+    # Fallback: first non-empty .py file (excluding __init__.py)
+    if (opendir my $dh, $dir) {
+        for my $file (sort readdir $dh) {
+            next unless $file =~ /\.py$/;
+            next if $file eq '__init__.py';
+            my $path = "$dir/$file";
+            if (-f $path && -s $path) {
+                return $path;
+            }
+        }
+    }
+
     return;
 }
 
