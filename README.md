@@ -11,20 +11,20 @@ Version 0.14
 
     lms [options] command/library
 
-    # Look at a command file
-    lms perl
+    # Look at a script command
+    lms greple
 
     # Look at a Perl module
     lms Getopt::Long
 
-    # Look at a Python library
-    lms os.path
+    # Look at a Python module
+    lms --py json
 
     # Show file path only
-    lms -l Getopt::Long
+    lms -l greple
 
-    # Show detailed file information
-    lms -ll Getopt::Long
+    # Show documentation
+    lms --py -m json
 
 # DESCRIPTION
 
@@ -97,7 +97,7 @@ for understanding how wrapper scripts delegate to their implementations.
 - **-t**, **--type** _handler\[:handler:...\]_
 
     Specify which file type handlers to use and in what order.
-    Handlers are specified as colon-separated names.
+    Handlers are specified as colon-separated names (case-insensitive).
 
     Default: `Command:Perl:Python`
 
@@ -108,7 +108,15 @@ for understanding how wrapper scripts delegate to their implementations.
 
     Examples:
         lms --type Perl Getopt::Long       # Only search Perl modules
-        lms --type Python:Perl os.path     # Search Python first, then Perl
+        lms --type python json             # Only search Python modules
+
+- **--py**
+
+    Shortcut for `--type Python`. Search only Python modules.
+
+- **--pl**
+
+    Shortcut for `--type Perl`. Search only Perl modules.
 
 - **--suffix** _extension_
 
@@ -146,37 +154,37 @@ implement a `get_path($app, $name)` method.
 
 # EXAMPLES
 
-    # Display a shell command file
-    lms bash
+    # Display a script command (brew is a shell script)
+    lms brew
 
     # Display a Perl module
     lms List::Util
 
-    # Display a Python library
-    lms os.path
+    # Display a Python module
+    lms --py json
 
     # Just show the file path
-    lms -l perl
+    lms -l brew
 
     # Show detailed file information
-    lms -ll Getopt::EX::Long
+    lms -ll Getopt::Long
 
     # Show documentation (perldoc for Perl, pydoc for Python, man for commands)
-    lms -m App::Greple
-    lms -m os.path
+    lms -m List::Util
+    lms --py -m json
     lms -m ls
 
     # Only search for Perl modules
-    lms --type Perl Data::Dumper
+    lms --pl Data::Dumper
 
-    # Search Python first, then fall back to Perl
-    lms --type Python:Perl sys
+    # Only search for Python modules
+    lms --py os.path
 
     # Use a custom pager
-    lms --pager "vim -R" Moose
+    lms --pager "vim -R" List::Util
 
     # Pass options to the pager (use -- to separate)
-    lms -- +10 List::Util  # Open less at line 10
+    lms -- +10 List::Util  # Open at line 10
 
 # INSTALLATION
 

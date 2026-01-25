@@ -26,6 +26,8 @@ use Getopt::EX::Hashed; {
     has pager   => ' p =s  ' ;
     has suffix  => '   =s  ' , default => [ qw( .pm ) ] ;
     has type    => ' t =s  ' , default => 'Command:Perl:Python' ;
+    has py      => '       ' , action => sub { $_->type('Python') } ;
+    has pl      => '       ' , action => sub { $_->type('Perl') } ;
     has skip    => '   =s@ ' ,
 	default => [ $ENV{OPTEX_BINDIR} || ".optex.d/bin" ] ;
 } no Getopt::EX::Hashed;
@@ -55,6 +57,7 @@ sub run {
     my @found;
     my $found_type;
     for my $type (split /:+/, $app->type) {
+	$type = _normalize_type($type);
 	my $handler = __PACKAGE__ . '::' . $type;
 	warn "Trying handler: $type\n" if $app->debug;
 	no strict 'refs';
@@ -131,6 +134,16 @@ sub _default_pager {
 	my $bat = first { -x } map { "$_/bat" } split /:/, $ENV{PATH};
 	$bat // 'less';
     };
+}
+
+sub _normalize_type {
+    my $type = shift;
+    state %map = (
+	command => 'Command',
+	perl    => 'Perl',
+	python  => 'Python',
+    );
+    $map{lc $type} // ucfirst lc $type;
 }
 
 1;
