@@ -45,8 +45,12 @@ script language.
 For library files, Perl modules are fully supported, and experimental support
 for Python libraries is included.
 
-The program searches through different file types in order (command, Perl, Python by default)
-and displays the first match found using a pager.
+The program searches through all file type handlers (Command, Perl, Python
+by default) and displays all matches found using a pager.
+
+For Homebrew-installed commands, both the wrapper script in C<bin/> and
+the actual executable in C<libexec/bin/> are displayed. This is useful
+for understanding how wrapper scripts delegate to their implementations.
 
 =head1 OPTIONS
 
@@ -96,6 +100,10 @@ Display version information and exit.
 Specify the pager command to use for displaying files.
 Defaults to the C<$LMS_PAGER> environment variable, or C<bat> if available,
 otherwise C<less>.
+
+When multiple files are found, C<bat> displays all files continuously
+with syntax highlighting. With C<less>, use C<:n> to navigate to the
+next file and C<:p> for the previous file.
 
 =item B<-t>, B<--type> I<handler[:handler:...]>
 
@@ -148,20 +156,8 @@ Perl module files (.pm and .pl files).
 
 =item B<App::lms::Python>
 
-Handler for Python libraries. Uses L<Inline::Python> module to execute
-Python's C<inspect.getsourcefile()> function to locate Python module files.
-This is experimental functionality.
-
-=back
-
-=head1 FILES
-
-=over 7
-
-=item F<~/.Inline>
-
-Directory used by the L<Inline::Python> module for caching compiled Python bindings.
-Automatically created on first use when accessing Python libraries.
+Handler for Python libraries. Executes Python's C<inspect.getsourcefile()>
+function to locate Python module files.
 
 =back
 
@@ -230,7 +226,7 @@ If set, overrides the default skip pattern for the C<--skip> option.
 
 =head1 SEE ALSO
 
-L<App::lms>, L<Getopt::EX>, L<Getopt::EX::Hashed>, L<Inline::Python>
+L<App::lms>, L<Getopt::EX>, L<Getopt::EX::Hashed>
 
 =head1 AUTHOR
 

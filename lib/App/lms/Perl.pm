@@ -4,6 +4,11 @@ use warnings;
 
 my $DEBUG;
 
+sub man_cmd {
+    my($app, $name, $path) = @_;
+    return ('perldoc', '-F', $path);
+}
+
 sub get_path {
     my $app  = shift;
     my $name = shift;

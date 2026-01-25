@@ -7,7 +7,6 @@ use warnings;
 
 use utf8;
 use Encode;
-use Data::Dumper;
 use open IO => 'utf8', ':std';
 use Pod::Usage;
 use List::Util qw(any first);
@@ -89,14 +88,9 @@ sub run {
     }
 
     if ($app->man) {
-	my @cmd;
-	if ($found_type eq 'Perl') {
-	    @cmd = ('perldoc', '-F', $found[0]);
-	} elsif ($found_type eq 'Python') {
-	    @cmd = ('python3', '-m', 'pydoc', $name);
-	} elsif ($found_type eq 'Command') {
-	    @cmd = ('man', $name);
-	}
+	my $handler = __PACKAGE__ . '::' . $found_type;
+	no strict 'refs';
+	my @cmd = &{"$handler\::man_cmd"}($app, $name, $found[0]);
 	if ($app->dryrun) {
 	    say "@cmd";
 	    return 0;

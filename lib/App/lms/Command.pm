@@ -5,6 +5,11 @@ use warnings;
 my $DEBUG;
 my $RAW;
 
+sub man_cmd {
+    my($app, $name, $path) = @_;
+    return ('man', $name);
+}
+
 sub get_path {
     my $app  = shift;
     my $name = shift;

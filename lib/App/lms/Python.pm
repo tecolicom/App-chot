@@ -7,6 +7,11 @@ use Command::Run;
 my $PYTHON;
 my $DEBUG;
 
+sub man_cmd {
+    my($app, $name, $path) = @_;
+    return ('python3', '-m', 'pydoc', $name);
+}
+
 sub get_path {
     my($app, $name) = @_;
     $DEBUG = $app->debug;

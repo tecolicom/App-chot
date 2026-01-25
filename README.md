@@ -36,8 +36,12 @@ script language.
 For library files, Perl modules are fully supported, and experimental support
 for Python libraries is included.
 
-The program searches through different file types in order (command, Perl, Python by default)
-and displays the first match found using a pager.
+The program searches through all file type handlers (Command, Perl, Python
+by default) and displays all matches found using a pager.
+
+For Homebrew-installed commands, both the wrapper script in `bin/` and
+the actual executable in `libexec/bin/` are displayed. This is useful
+for understanding how wrapper scripts delegate to their implementations.
 
 # OPTIONS
 
@@ -86,6 +90,10 @@ and displays the first match found using a pager.
     Defaults to the `$LMS_PAGER` environment variable, or `bat` if available,
     otherwise `less`.
 
+    When multiple files are found, `bat` displays all files continuously
+    with syntax highlighting. With `less`, use `:n` to navigate to the
+    next file and `:p` for the previous file.
+
 - **-t**, **--type** _handler\[:handler:...\]_
 
     Specify which file type handlers to use and in what order.
@@ -133,16 +141,8 @@ implement a `get_path($app, $name)` method.
 
 - **App::lms::Python**
 
-    Handler for Python libraries. Uses [Inline::Python](https://metacpan.org/pod/Inline%3A%3APython) module to execute
-    Python's `inspect.getsourcefile()` function to locate Python module files.
-    This is experimental functionality.
-
-# FILES
-
-- `~/.Inline`
-
-    Directory used by the [Inline::Python](https://metacpan.org/pod/Inline%3A%3APython) module for caching compiled Python bindings.
-    Automatically created on first use when accessing Python libraries.
+    Handler for Python libraries. Executes Python's `inspect.getsourcefile()`
+    function to locate Python module files.
 
 # EXAMPLES
 
@@ -205,7 +205,7 @@ implement a `get_path($app, $name)` method.
 
 # SEE ALSO
 
-[App::lms](https://metacpan.org/pod/App%3A%3Alms), [Getopt::EX](https://metacpan.org/pod/Getopt%3A%3AEX), [Getopt::EX::Hashed](https://metacpan.org/pod/Getopt%3A%3AEX%3A%3AHashed), [Inline::Python](https://metacpan.org/pod/Inline%3A%3APython)
+[App::lms](https://metacpan.org/pod/App%3A%3Alms), [Getopt::EX](https://metacpan.org/pod/Getopt%3A%3AEX), [Getopt::EX::Hashed](https://metacpan.org/pod/Getopt%3A%3AEX%3A%3AHashed)
 
 # AUTHOR
 
