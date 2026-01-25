@@ -9,27 +9,26 @@ sub get_path {
     my $app  = shift;
     my $name = shift;
     $DEBUG = $app->debug;
-    $RAW   = $app->raw || $app->all;
+    $RAW   = $app->raw;
     my @path = grep $app->valid($_), split /:/, $ENV{'PATH'};
     my @found = grep { -x $_ } map { "$_/$name" } @path;
     return @found if $RAW;
     map { resolve_homebrew_wrapper($_) }
-    grep { defined }
-    map { reject_pyenv_shim($_) }
+    map { detect_pyenv_shim($_) }
     @found;
 }
 
-# pyenv shim は拒否して Python ハンドラに任せる
-sub reject_pyenv_shim {
+# pyenv shim を検出してログ出力
+sub detect_pyenv_shim {
     my $path = shift;
     if ($path =~ m{/\.pyenv/shims/}) {
-	warn "  Reject pyenv shim: $path\n" if $DEBUG;
-	return;
+	warn "  Found pyenv shim: $path\n" if $DEBUG;
     }
     return $path;
 }
 
 # Resolve Homebrew wrapper scripts to actual scripts
+# Returns both wrapper and resolved path
 sub resolve_homebrew_wrapper {
     my $path = shift;
 
@@ -50,7 +49,7 @@ sub resolve_homebrew_wrapper {
             $real_path =~ s/["'].*//;
             if (-x $real_path) {
                 warn "  Resolved to: $real_path\n" if $DEBUG;
-                return $real_path;
+                return ($path, $real_path);
             }
         }
     }

@@ -16,7 +16,7 @@ use Text::ParseWords qw(shellwords);
 
 use Getopt::EX::Hashed; {
     Getopt::EX::Hashed->configure(DEFAULT => [ is => 'rw' ]);
-    has all     => ' a     ' ;
+    has one     => ' 1     ' ;
     has debug   => ' d +   ' ;
     has dryrun  => ' n     ' ;
     has raw     => ' r     ' ;
@@ -51,7 +51,7 @@ sub run {
 	pod2usage();
     }
     my @option = splice @ARGV;
-    my $pager = $app->pager || $ENV{'PAGER'} || 'less';
+    my $pager = $app->pager || $ENV{'LMS_PAGER'} || _default_pager();
 
     my @found;
     my $found_type;
@@ -65,7 +65,7 @@ sub run {
 		warn "Found by $type: @paths\n" if $app->debug;
 		push @found, @paths;
 		$found_type //= $type;
-		last unless $app->all;
+		last if $app->one;
 	    } else {
 		warn "Not found by $type\n" if $app->debug;
 	    }
@@ -130,6 +130,13 @@ sub valid {
 	sub { none { $_[0] =~ $_ } @re };
     };
     $sub->(@_);
+}
+
+sub _default_pager {
+    state $pager = do {
+	my $bat = first { -x } map { "$_/bat" } split /:/, $ENV{PATH};
+	$bat // 'less';
+    };
 }
 
 1;

@@ -41,10 +41,10 @@ and displays the first match found using a pager.
 
 # OPTIONS
 
-- **-a**, **--all**
+- **-1**, **--one**
 
-    Search all handlers and show all matching files, instead of stopping
-    at the first match. Also implies `--raw` to show unresolved paths.
+    Stop at the first handler that finds a match, instead of searching
+    all handlers (which is the default behavior).
 
 - **-d**, **--debug**
 
@@ -73,8 +73,8 @@ and displays the first match found using a pager.
 
 - **-r**, **--raw**
 
-    Show raw paths without resolving Homebrew wrapper scripts or
-    rejecting pyenv shims.
+    Show raw paths without resolving Homebrew wrapper scripts to
+    their actual executables.
 
 - **-v**, **--version**
 
@@ -83,7 +83,8 @@ and displays the first match found using a pager.
 - **-p**, **--pager** _command_
 
     Specify the pager command to use for displaying files.
-    Defaults to the `$PAGER` environment variable, or `less` if not set.
+    Defaults to the `$LMS_PAGER` environment variable, or `bat` if available,
+    otherwise `less`.
 
 - **-t**, **--type** _handler\[:handler:...\]_
 
@@ -193,10 +194,10 @@ implement a `get_path($app, $name)` method.
 
 # ENVIRONMENT
 
-- **PAGER**
+- **LMS\_PAGER**
 
     Default pager command to use when displaying files.
-    If not set, `less` is used.
+    If not set, `bat` is used if available, otherwise `less`.
 
 - **OPTEX\_BINDIR**
 
