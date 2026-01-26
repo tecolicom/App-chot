@@ -1,6 +1,7 @@
 package App::lms::Perl;
 use v5.14;
 use warnings;
+use Digest::MD5;
 
 my $DEBUG;
 
@@ -24,6 +25,15 @@ sub get_path {
     @libs;
 
     warn "  Found: @found\n" if $DEBUG && @found;
+
+    # Deduplicate files with identical content
+    my %seen;
+    @found = grep {
+        open my $fh, '<', $_ or return 1;
+        my $hash = Digest::MD5->new->addfile($fh)->hexdigest;
+        !$seen{$hash}++;
+    } @found;
+
     return @found;
 }
 
