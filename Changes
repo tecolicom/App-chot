@@ -2,6 +2,10 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.16 2026-01-26T10:25:15Z
+
+    - Deduplicate Perl modules with identical content using MD5 hash.
+
 0.15 2026-01-25T11:26:13Z
 
     - Add --py option as shortcut for --type Python.

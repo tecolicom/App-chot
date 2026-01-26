@@ -1,6 +1,6 @@
 package App::lms;
 
-our $VERSION = "0.15";
+our $VERSION = "0.16";
 
 use v5.14;
 use warnings;
