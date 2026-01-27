@@ -2,6 +2,10 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.17 2026-01-27T10:08:03Z
+
+    - Use bat --force-colorization to show file headers and colors when piped.
+
 0.16 2026-01-26T10:25:15Z
 
     - Deduplicate Perl modules with identical content using MD5 hash.

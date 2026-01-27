@@ -1,6 +1,6 @@
 package App::lms;
 
-our $VERSION = "0.16";
+our $VERSION = "0.17";
 
 use v5.14;
 use warnings;
@@ -132,7 +132,7 @@ sub valid {
 sub _default_pager {
     state $pager = do {
 	my $bat = first { -x } map { "$_/bat" } split /:/, $ENV{PATH};
-	$bat // 'less';
+	$bat ? "$bat --force-colorization" : 'less';
     };
 }
 
