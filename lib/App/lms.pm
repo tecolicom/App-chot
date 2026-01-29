@@ -19,7 +19,9 @@ use Getopt::EX::Hashed; {
     has debug   => ' d +   ' ;
     has dryrun  => ' n     ' ;
     has raw     => ' r     ' ;
-    has help    => ' h     ' , action => sub { pod2usage(-verbose => 1) } ;
+    has help    => ' h     ' , action => sub {
+	pod2usage(-verbose => 99, -sections => [qw(SYNOPSIS)])
+    } ;
     has list    => ' l +   ' ;
     has man     => ' m     ' ;
     has number  => ' N !   ' , default => 0 ;

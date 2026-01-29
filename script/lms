@@ -20,20 +20,27 @@ Version 0.18
 
     lms [options] command/library
 
-    # Look at a script command
-    lms greple
+  OPTIONS
+     -1   --one           Stop at the first match
+     -d   --debug         Show debug output
+     -n   --dryrun        Show command without executing
+     -h   --help          Print this message
+     -l   --list          Print file path (-ll for ls -l)
+     -m   --man           Show documentation
+     -N   --[no-]number   Line number display (default: off)
+     -r   --raw           Don't resolve Homebrew wrappers
+     -v   --version       Print version
+     -p   --pager=#       Specify pager command
+     -t   --type=#        Specify handler (Command:Perl:Python)
+          --py            Shortcut for --type Python
+          --pl            Shortcut for --type Perl
 
-    # Look at a Perl module
-    lms Getopt::Long
-
-    # Look at a Python module
-    lms --py json
-
-    # Show file path only
-    lms -l greple
-
-    # Show documentation
-    lms --py -m json
+  EXAMPLES
+    lms greple              # Look at a script command
+    lms Getopt::Long        # Look at a Perl module
+    lms --py json           # Look at a Python module
+    lms -l greple           # Show file path only
+    lms --py -m json        # Show documentation
 
 =head1 DESCRIPTION
 
