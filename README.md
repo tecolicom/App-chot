@@ -75,6 +75,15 @@ for understanding how wrapper scripts delegate to their implementations.
     \- Python: `pydoc`
     \- Command: `man`
 
+- **-N**, **--number**, **--no-number**
+
+    Enable or disable line number display in the pager.  Default is
+    `--no-number`.
+
+    For `bat`, `--number` uses `--style=full` and `--no-number`
+    uses `--style=header,grid,snip`.  For `less`, `--number` adds
+    `-N` option.
+
 - **-r**, **--raw**
 
     Show raw paths without resolving Homebrew wrapper scripts to

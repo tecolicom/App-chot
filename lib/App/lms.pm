@@ -22,6 +22,7 @@ use Getopt::EX::Hashed; {
     has help    => ' h     ' , action => sub { pod2usage(-verbose => 1) } ;
     has list    => ' l +   ' ;
     has man     => ' m     ' ;
+    has number  => ' N !   ' , default => 0 ;
     has version => ' v     ' , action => sub { say "Version: $VERSION"; exit } ;
     has pager   => ' p =s  ' ;
     has suffix  => '   =s  ' , default => [ qw( .pm ) ] ;
@@ -109,7 +110,17 @@ sub run {
 	}
     } @found or return 0;
 
-    my @cmd = (shellwords($pager), @option, @found);
+    my @pager_opts;
+    if (defined $app->number) {
+	my $pager_name = (shellwords($pager))[0];
+	$pager_name =~ s{.*/}{};  # basename
+	if ($pager_name eq 'bat') {
+	    push @pager_opts, $app->number ? '--style=full' : '--style=header,grid,snip';
+	} elsif ($pager_name eq 'less') {
+	    push @pager_opts, '-N' if $app->number;
+	}
+    }
+    my @cmd = (shellwords($pager), @pager_opts, @option, @found);
     if ($app->dryrun) {
 	say "@cmd";
 	return 0;

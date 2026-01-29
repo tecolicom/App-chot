@@ -86,6 +86,15 @@ Display manual/documentation using the appropriate tool for each language:
 - Python: C<pydoc>
 - Command: C<man>
 
+=item B<-N>, B<--number>, B<--no-number>
+
+Enable or disable line number display in the pager.  Default is
+C<--no-number>.
+
+For C<bat>, C<--number> uses C<--style=full> and C<--no-number>
+uses C<--style=header,grid,snip>.  For C<less>, C<--number> adds
+C<-N> option.
+
 =item B<-r>, B<--raw>
 
 Show raw paths without resolving Homebrew wrapper scripts to
