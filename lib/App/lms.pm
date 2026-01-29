@@ -149,12 +149,12 @@ sub _default_pager {
 
 sub _normalize_type {
     my $type = shift;
-    state %map = (
+    state $map = {
 	command => 'Command',
 	perl    => 'Perl',
 	python  => 'Python',
-    );
-    $map{lc $type} // ucfirst lc $type;
+    };
+    $map->{lc $type} // ucfirst lc $type;
 }
 
 1;
