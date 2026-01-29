@@ -2,6 +2,11 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.18 2026-01-29T02:34:37Z
+
+    - Add -N/--number/--no-number option for line number display
+    - Fix state hash initialization for Perl 5.24 compatibility
+
 0.17 2026-01-27T10:08:03Z
 
     - Use bat --force-colorization to show file headers and colors when piped.
