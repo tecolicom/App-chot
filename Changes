@@ -2,6 +2,10 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.19 2026-01-29T03:13:51Z
+
+    - Show concise help with -h option
+
 0.18 2026-01-29T02:34:37Z
 
     - Add -N/--number/--no-number option for line number display
