@@ -204,17 +204,15 @@ implement a `get_path($app, $name)` method.
 
 # INSTALLATION
 
+    # Homebrew
+    brew tap tecolicom/tap
+    brew install app-lms
+
     # From CPAN
     cpanm App::lms
 
     # From GitHub
     cpanm https://github.com/kaz-utashiro/App-lms.git
-
-    # From source
-    git clone https://github.com/kaz-utashiro/App-lms.git
-    cd App-lms
-    cpanm --installdeps .
-    cpanm .
 
 # ENVIRONMENT
 
