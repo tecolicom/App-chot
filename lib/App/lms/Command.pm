@@ -38,8 +38,7 @@ sub resolve_homebrew_wrapper {
     my $path = shift;
 
     # Check if it's in Homebrew bin directory
-    return $path unless $path =~ m{^(/opt/homebrew|/usr/local)/bin/};
-    my $prefix = $1;
+    my $prefix = homebrew_prefix($path) // return $path;
     warn "  Check Homebrew wrapper: $path\n" if $DEBUG;
 
     # Check if it's a shell script wrapper
@@ -61,6 +60,17 @@ sub resolve_homebrew_wrapper {
     close $fh;
 
     return $path;
+}
+
+sub homebrew_prefix {
+    my $path = shift;
+    if ($ENV{HOMEBREW_PREFIX} and $path =~ m{^\Q$ENV{HOMEBREW_PREFIX}\E/bin/}) {
+        return $ENV{HOMEBREW_PREFIX};
+    }
+    for my $prefix ('/opt/homebrew', '/usr/local', '/home/linuxbrew/.linuxbrew') {
+        return $prefix if $path =~ m{^\Q$prefix\E/bin/};
+    }
+    return undef;
 }
 
 1;
