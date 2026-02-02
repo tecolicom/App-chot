@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-our $VERSION = "0.21";
+our $VERSION = "0.99";
 use strict;
 use warnings;
 use App::lms;
@@ -14,7 +14,7 @@ lms - Let Me See command
 
 =head1 VERSION
 
-Version 0.21
+Version 0.99
 
 =head1 SYNOPSIS
 
@@ -312,7 +312,7 @@ Kazumasa Utashiro
 
 =head1 LICENSE
 
-Copyright 1992- Kazumasa Utashiro.
+Copyright 1992-2026 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

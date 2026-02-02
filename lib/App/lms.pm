@@ -1,6 +1,6 @@
 package App::lms;
 
-our $VERSION = "0.21";
+our $VERSION = "0.99";
 
 use v5.14;
 use warnings;
@@ -206,7 +206,7 @@ Kazumasa Utashiro
 
 =head1 LICENSE
 
-Copyright 1992-2021 Kazumasa Utashiro.
+Copyright 1992-2026 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

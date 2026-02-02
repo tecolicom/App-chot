@@ -5,7 +5,7 @@ lms - Let Me See command
 
 # VERSION
 
-Version 0.21
+Version 0.99
 
 # SYNOPSIS
 
@@ -291,7 +291,7 @@ Kazumasa Utashiro
 
 # LICENSE
 
-Copyright 1992- Kazumasa Utashiro.
+Copyright 1992-2026 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

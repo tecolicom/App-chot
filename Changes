@@ -2,6 +2,11 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.99 2026-02-02T02:29:53Z
+
+    - Add Node.js handler (--nd) using require.resolve with subpath support.
+    - Add Ruby handler (--rb) using $LOADED_FEATURES inspection.
+
 0.21 2026-02-02T01:19:05Z
 
     - Add --bat-theme option for automatic BAT_THEME selection based on terminal background
