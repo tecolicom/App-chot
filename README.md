@@ -1,7 +1,7 @@
 [![Actions Status](https://github.com/tecolicom/App-chot/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tecolicom/App-chot/actions?workflow=test)
 # NAME
 
-chot - command and library source viewer
+chot - Command Heuristic Omni-Tracer
 
 # VERSION
 
@@ -14,6 +14,7 @@ Version 0.99
     OPTIONS
        -1   --one           Stop at the first match
        -d   --debug         Show debug output
+       -i   --info          Show command trace info
        -n   --dryrun        Show command without executing
        -h   --help          Print this message
        -l   --list          Print file path (-ll for ls -l)
@@ -66,6 +67,14 @@ for understanding how wrapper scripts delegate to their implementations.
 
     Show debug output on stderr. Displays which handlers are tried
     and how paths are resolved.
+
+- **-i**, **--info**
+
+    Show command trace information without displaying file contents.
+    For each command found, displays its type (optex symlink, Homebrew
+    wrapper, plain command, etc.), file type (perl, bash, binary, etc.),
+    and resolution chain. For optex commands, also shows alias
+    definitions and rc file locations.
 
 - **-n**, **--dryrun**
 
@@ -176,7 +185,7 @@ for understanding how wrapper scripts delegate to their implementations.
     Specify directory patterns to skip during search.
     Can be used multiple times to specify multiple patterns.
 
-    Default: `.optex.d/bin` (or `$OPTEX_BINDIR` if set)
+    Default: none (optex symlinks are resolved automatically)
 
 # HANDLER MODULES
 
@@ -188,6 +197,13 @@ implement a `get_path($app, $name)` method.
 
     Handler for executable commands. Searches through `$PATH` environment
     variable to find executable files.
+
+    For [optex](https://metacpan.org/pod/App%3A%3Aoptex) symlinks (commands that are symlinks pointing
+    to the `optex` binary), the handler resolves them to the actual
+    command by searching `$PATH` (skipping other optex symlinks). If the
+    command has an alias defined in `~/.optex.d/config.toml`, the alias
+    target is used for resolution. When a `~/.optex.d/NAME.rc`
+    configuration file exists, it is included in the results.
 
 - **App::chot::Perl**
 
@@ -277,9 +293,11 @@ implement a `get_path($app, $name)` method.
     option and automatic detection.  See `bat --list-themes` for available
     themes.
 
-- **OPTEX\_BINDIR**
+- **OPTEX\_ROOT**
 
-    If set, overrides the default skip pattern for the `--skip` option.
+    Root directory for optex configuration.  Defaults to `~/.optex.d`.
+    Used to locate `config.toml` and `*.rc` files for optex command
+    resolution.
 
 # SEE ALSO
 

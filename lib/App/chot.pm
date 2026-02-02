@@ -11,6 +11,7 @@ use open IO => 'utf8', ':std';
 use Pod::Usage;
 use List::Util qw(any first);
 use App::chot::Util;
+use App::chot::Optex qw(detect_optex);
 use Text::ParseWords qw(shellwords);
 
 use Getopt::EX::Hashed; {
@@ -18,6 +19,7 @@ use Getopt::EX::Hashed; {
     has one     => ' 1     ' ;
     has debug   => ' d +   ' ;
     has dryrun  => ' n     ' ;
+    has info    => ' i     ' ;
     has raw     => ' r     ' ;
     has help    => ' h     ' , action => sub {
 	pod2usage(-verbose => 99, -sections => [qw(SYNOPSIS)])
@@ -36,7 +38,7 @@ use Getopt::EX::Hashed; {
     has bat_theme => '   %   ' ,
 	default => { light => 'Coldark-Cold', dark => 'Coldark-Dark' } ;
     has skip    => '   =s@ ' ,
-	default => [ $ENV{OPTEX_BINDIR} || ".optex.d/bin" ] ;
+	default => [] ;
 } no Getopt::EX::Hashed;
 
 sub run {
@@ -60,6 +62,19 @@ sub run {
     }
     my @option = splice @ARGV;
     my $pager = $app->pager || $ENV{'CHOT_PAGER'} || _default_pager($app);
+
+    if ($app->info) {
+	for my $type (split /:+/, $app->type) {
+	    $type = _normalize_type($type);
+	    my $handler = __PACKAGE__ . '::' . $type;
+	    no strict 'refs';
+	    eval "require $handler" or next;
+	    if (defined &{"$handler\::get_info"}) {
+		&{"$handler\::get_info"}($app, $name);
+	    }
+	}
+	return 0;
+    }
 
     my @found;
     my $found_type;
@@ -109,6 +124,7 @@ sub run {
 	die "$found_type man: $!\n";
     }
 
+    @found = grep { !detect_optex($_) } @found;
     @found = grep {
 	not &is_binary($_) or do {
 	    system 'file', $_;
@@ -189,7 +205,7 @@ __END__
 
 =head1 NAME
 
-chot - command and library source viewer
+chot - Command Heuristic Omni-Tracer
 
 =head1 SYNOPSIS
 

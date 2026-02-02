@@ -10,7 +10,7 @@ exit App::chot->new->run(splice @ARGV);
 
 =head1 NAME
 
-chot - command and library source viewer
+chot - Command Heuristic Omni-Tracer
 
 =head1 VERSION
 
@@ -23,6 +23,7 @@ Version 0.99
   OPTIONS
      -1   --one           Stop at the first match
      -d   --debug         Show debug output
+     -i   --info          Show command trace info
      -n   --dryrun        Show command without executing
      -h   --help          Print this message
      -l   --list          Print file path (-ll for ls -l)
@@ -77,6 +78,14 @@ all handlers (which is the default behavior).
 
 Show debug output on stderr. Displays which handlers are tried
 and how paths are resolved.
+
+=item B<-i>, B<--info>
+
+Show command trace information without displaying file contents.
+For each command found, displays its type (optex symlink, Homebrew
+wrapper, plain command, etc.), file type (perl, bash, binary, etc.),
+and resolution chain. For optex commands, also shows alias
+definitions and rc file locations.
 
 =item B<-n>, B<--dryrun>
 
@@ -187,7 +196,7 @@ Default: C<.pm>
 Specify directory patterns to skip during search.
 Can be used multiple times to specify multiple patterns.
 
-Default: C<.optex.d/bin> (or C<$OPTEX_BINDIR> if set)
+Default: none (optex symlinks are resolved automatically)
 
 =back
 
@@ -203,6 +212,13 @@ implement a C<get_path($app, $name)> method.
 
 Handler for executable commands. Searches through C<$PATH> environment
 variable to find executable files.
+
+For L<optex|App::optex> symlinks (commands that are symlinks pointing
+to the C<optex> binary), the handler resolves them to the actual
+command by searching C<$PATH> (skipping other optex symlinks). If the
+command has an alias defined in C<~/.optex.d/config.toml>, the alias
+target is used for resolution. When a C<~/.optex.d/NAME.rc>
+configuration file exists, it is included in the results.
 
 =item B<App::chot::Perl>
 
@@ -296,9 +312,11 @@ Theme for C<bat> pager.  If set, takes precedence over C<--bat-theme>
 option and automatic detection.  See C<bat --list-themes> for available
 themes.
 
-=item B<OPTEX_BINDIR>
+=item B<OPTEX_ROOT>
 
-If set, overrides the default skip pattern for the C<--skip> option.
+Root directory for optex configuration.  Defaults to C<~/.optex.d>.
+Used to locate C<config.toml> and C<*.rc> files for optex command
+resolution.
 
 =back
 
