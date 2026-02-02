@@ -2,6 +2,10 @@ Revision history for "lms" command
 
 {{$NEXT}}
 
+0.21 2026-02-02T01:19:05Z
+
+    - Add --bat-theme option for automatic BAT_THEME selection based on terminal background
+
 0.20 2026-02-01T11:28:13Z
 
     - Support Linuxbrew path resolution in Homebrew wrapper detection
