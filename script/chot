@@ -65,6 +65,14 @@ For Homebrew-installed commands, both the wrapper script in C<bin/> and
 the actual executable in C<libexec/bin/> are displayed. This is useful
 for understanding how wrapper scripts delegate to their implementations.
 
+For L<optex|App::optex> commands (symlinks in C<~/.optex.d/bin/>
+pointing to the C<optex> binary), the actual command is resolved by
+searching C<$PATH>.  If an alias is defined in
+C<~/.optex.d/config.toml>, the alias target is followed.
+Configuration files (C<~/.optex.d/NAME.rc>) are also included in
+the results.  Use C<-i> to see the full resolution chain including
+alias definitions.
+
 =head1 OPTIONS
 
 =over 7
@@ -322,7 +330,7 @@ resolution.
 
 =head1 SEE ALSO
 
-L<App::chot>, L<Getopt::EX>, L<Getopt::EX::Hashed>
+L<App::chot>, L<App::optex>, L<Getopt::EX>, L<Getopt::EX::Hashed>
 
 =head1 AUTHOR
 

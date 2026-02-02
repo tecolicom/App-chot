@@ -56,6 +56,14 @@ For Homebrew-installed commands, both the wrapper script in `bin/` and
 the actual executable in `libexec/bin/` are displayed. This is useful
 for understanding how wrapper scripts delegate to their implementations.
 
+For [optex](https://metacpan.org/pod/App%3A%3Aoptex) commands (symlinks in `~/.optex.d/bin/`
+pointing to the `optex` binary), the actual command is resolved by
+searching `$PATH`.  If an alias is defined in
+`~/.optex.d/config.toml`, the alias target is followed.
+Configuration files (`~/.optex.d/NAME.rc`) are also included in
+the results.  Use `-i` to see the full resolution chain including
+alias definitions.
+
 # OPTIONS
 
 - **-1**, **--one**
@@ -301,7 +309,7 @@ implement a `get_path($app, $name)` method.
 
 # SEE ALSO
 
-[App::chot](https://metacpan.org/pod/App%3A%3Achot), [Getopt::EX](https://metacpan.org/pod/Getopt%3A%3AEX), [Getopt::EX::Hashed](https://metacpan.org/pod/Getopt%3A%3AEX%3A%3AHashed)
+[App::chot](https://metacpan.org/pod/App%3A%3Achot), [App::optex](https://metacpan.org/pod/App%3A%3Aoptex), [Getopt::EX](https://metacpan.org/pod/Getopt%3A%3AEX), [Getopt::EX::Hashed](https://metacpan.org/pod/Getopt%3A%3AEX%3A%3AHashed)
 
 # AUTHOR
 
