@@ -1,7 +1,7 @@
-[![Actions Status](https://github.com/kaz-utashiro/App-lms/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/kaz-utashiro/App-lms/actions?workflow=test)
+[![Actions Status](https://github.com/tecolicom/App-chot/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tecolicom/App-chot/actions?workflow=test)
 # NAME
 
-lms - Let Me See command
+chot - command and library source viewer
 
 # VERSION
 
@@ -9,7 +9,7 @@ Version 0.99
 
 # SYNOPSIS
 
-      lms [options] command/library
+      chot [options] command/library
 
     OPTIONS
        -1   --one           Stop at the first match
@@ -30,17 +30,17 @@ Version 0.99
             --bat-theme     Set bat theme per mode (light=X dark=X)
 
     EXAMPLES
-      lms greple              # Look at a script command
-      lms Getopt::Long        # Look at a Perl module
-      lms --py json           # Look at a Python module
-      lms --rb json           # Look at a Ruby library
-      lms --nd express        # Look at a Node.js module
-      lms -l greple           # Show file path only
-      lms --py -m json        # Show documentation
+      chot greple              # Look at a script command
+      chot Getopt::Long        # Look at a Perl module
+      chot --py json           # Look at a Python module
+      chot --rb json           # Look at a Ruby library
+      chot --nd express        # Look at a Node.js module
+      chot -l greple           # Show file path only
+      chot --py -m json        # Show documentation
 
 # DESCRIPTION
 
-**lms** (Let Me See) is a utility to locate and display command or library files.
+**chot** is a utility to locate and display command or library source files.
 
 It is convenient to see a command file written in shell or any other
 script language.
@@ -110,7 +110,7 @@ for understanding how wrapper scripts delegate to their implementations.
 - **-p**, **--pager** _command_
 
     Specify the pager command to use for displaying files.
-    Defaults to the `$LMS_PAGER` environment variable, or `bat` if available,
+    Defaults to the `$CHOT_PAGER` environment variable, or `bat` if available,
     otherwise `less`.
 
     When multiple files are found, `bat` displays all files continuously
@@ -132,10 +132,10 @@ for understanding how wrapper scripts delegate to their implementations.
     \- `Node`: Search for Node.js modules using `require.resolve`
 
     Examples:
-        lms --type Perl Getopt::Long       # Only search Perl modules
-        lms --type python json             # Only search Python modules
-        lms --type ruby yaml               # Only search Ruby libraries
-        lms --type node express            # Only search Node.js modules
+        chot --type Perl Getopt::Long       # Only search Perl modules
+        chot --type python json             # Only search Python modules
+        chot --type ruby yaml               # Only search Ruby libraries
+        chot --type node express            # Only search Node.js modules
 
 - **--py**
 
@@ -184,28 +184,28 @@ The program uses a plugin architecture where different file type handlers
 are dynamically loaded based on the `--type` option. Each handler must
 implement a `get_path($app, $name)` method.
 
-- **App::lms::Command**
+- **App::chot::Command**
 
     Handler for executable commands. Searches through `$PATH` environment
     variable to find executable files.
 
-- **App::lms::Perl**
+- **App::chot::Perl**
 
     Handler for Perl modules. Searches through `@INC` paths to find
     Perl module files (.pm and .pl files).
 
-- **App::lms::Python**
+- **App::chot::Python**
 
     Handler for Python libraries. Executes Python's `inspect.getsourcefile()`
     function to locate Python module files.
 
-- **App::lms::Ruby**
+- **App::chot::Ruby**
 
     Handler for Ruby libraries. Loads the specified library with `require`
     and inspects `$LOADED_FEATURES` to find the actual file path.
     Documentation is displayed using `ri`.
 
-- **App::lms::Node**
+- **App::chot::Node**
 
     Handler for Node.js modules. Uses `require.resolve` with global paths
     to locate module entry points.
@@ -214,59 +214,59 @@ implement a `get_path($app, $name)` method.
 # EXAMPLES
 
     # Display a script command (brew is a shell script)
-    lms brew
+    chot brew
 
     # Display a Perl module
-    lms List::Util
+    chot List::Util
 
     # Display a Python module
-    lms --py json
+    chot --py json
 
     # Just show the file path
-    lms -l brew
+    chot -l brew
 
     # Show detailed file information
-    lms -ll Getopt::Long
+    chot -ll Getopt::Long
 
     # Show documentation (perldoc for Perl, pydoc for Python, ri for Ruby, etc.)
-    lms -m List::Util
-    lms --py -m json
-    lms --rb -m json
-    lms -m ls
+    chot -m List::Util
+    chot --py -m json
+    chot --rb -m json
+    chot -m ls
 
     # Only search for Perl modules
-    lms --pl Data::Dumper
+    chot --pl Data::Dumper
 
     # Only search for Python modules
-    lms --py os.path
+    chot --py os.path
 
     # Display a Ruby library
-    lms --rb yaml
+    chot --rb yaml
 
     # Display a Node.js module
-    lms --nd express
+    chot --nd express
 
     # Use a custom pager
-    lms --pager "vim -R" List::Util
+    chot --pager "vim -R" List::Util
 
     # Pass options to the pager (use -- to separate)
-    lms -- +10 List::Util  # Open at line 10
+    chot -- +10 List::Util  # Open at line 10
 
 # INSTALLATION
 
     # Homebrew
     brew tap tecolicom/tap
-    brew install app-lms
+    brew install app-chot
 
     # From CPAN
-    cpanm App::lms
+    cpanm App::chot
 
     # From GitHub
-    cpanm https://github.com/kaz-utashiro/App-lms.git
+    cpanm https://github.com/tecolicom/App-chot.git
 
 # ENVIRONMENT
 
-- **LMS\_PAGER**
+- **CHOT\_PAGER**
 
     Default pager command to use when displaying files.
     If not set, `bat` is used if available, otherwise `less`.
@@ -283,7 +283,7 @@ implement a `get_path($app, $name)` method.
 
 # SEE ALSO
 
-[App::lms](https://metacpan.org/pod/App%3A%3Alms), [Getopt::EX](https://metacpan.org/pod/Getopt%3A%3AEX), [Getopt::EX::Hashed](https://metacpan.org/pod/Getopt%3A%3AEX%3A%3AHashed)
+[App::chot](https://metacpan.org/pod/App%3A%3Achot), [Getopt::EX](https://metacpan.org/pod/Getopt%3A%3AEX), [Getopt::EX::Hashed](https://metacpan.org/pod/Getopt%3A%3AEX%3A%3AHashed)
 
 # AUTHOR
 

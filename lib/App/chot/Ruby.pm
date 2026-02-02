@@ -1,4 +1,4 @@
-package App::lms::Ruby;
+package App::chot::Ruby;
 
 use v5.14;
 use warnings;

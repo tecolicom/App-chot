@@ -1,4 +1,4 @@
-Revision history for "lms" command
+Revision history for "chot" command
 
 {{$NEXT}}
 
@@ -54,7 +54,7 @@ Revision history for "lms" command
     - Add -1/--one option to stop at first match.
     - Change default behavior to search all handlers and show all files.
     - Use bat as default pager if available.
-    - Support LMS_PAGER environment variable.
+    - Support CHOT_PAGER environment variable.
     - Show both wrapper and resolved path for Homebrew commands.
     - Refactor language-specific code into handler modules.
 

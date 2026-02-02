@@ -1,4 +1,4 @@
-package App::lms::Perl;
+package App::chot::Perl;
 use v5.14;
 use warnings;
 use Digest::MD5;

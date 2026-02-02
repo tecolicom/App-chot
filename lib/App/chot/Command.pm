@@ -1,4 +1,4 @@
-package App::lms::Command;
+package App::chot::Command;
 use v5.14;
 use warnings;
 

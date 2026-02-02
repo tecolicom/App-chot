@@ -1,4 +1,4 @@
-package App::lms::Node;
+package App::chot::Node;
 
 use v5.14;
 use warnings;

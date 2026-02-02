@@ -1,4 +1,4 @@
-package App::lms::Python;
+package App::chot::Python;
 
 use v5.14;
 use warnings;

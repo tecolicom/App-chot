@@ -1,5 +1,5 @@
 {
-   "abstract" : "Let Me See command",
+   "abstract" : "command and library source viewer",
    "author" : [
       "Kazumasa Utashiro"
    ],
@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : 2
    },
-   "name" : "App-lms",
+   "name" : "App-chot",
    "no_index" : {
       "directory" : [
          "t",
@@ -61,13 +61,13 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/kaz-utashiro/App-lms/issues"
+         "web" : "https://github.com/tecolicom/App-chot/issues"
       },
-      "homepage" : "https://github.com/kaz-utashiro/App-lms",
+      "homepage" : "https://github.com/tecolicom/App-chot",
       "repository" : {
          "type" : "git",
-         "url" : "https://github.com/kaz-utashiro/App-lms.git",
-         "web" : "https://github.com/kaz-utashiro/App-lms"
+         "url" : "https://github.com/tecolicom/App-chot.git",
+         "web" : "https://github.com/tecolicom/App-chot"
       }
    },
    "version" : "0.99",

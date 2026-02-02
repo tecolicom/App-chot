@@ -1,5 +1,5 @@
-name = "App-lms"
-readme_from = "script/lms"
+name = "App-chot"
+readme_from = "script/chot"
 badges = [ 'github-actions/test' ]
 authority = "cpan:UTASHIRO"
 

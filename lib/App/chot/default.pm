@@ -1,4 +1,4 @@
-package App::lms::default;
+package App::chot::default;
 1;
 
 __DATA__

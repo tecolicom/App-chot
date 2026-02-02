@@ -2,15 +2,15 @@
 our $VERSION = "0.99";
 use strict;
 use warnings;
-use App::lms;
+use App::chot;
 
-exit App::lms->new->run(splice @ARGV);
+exit App::chot->new->run(splice @ARGV);
 
 =encoding utf-8
 
 =head1 NAME
 
-lms - Let Me See command
+chot - command and library source viewer
 
 =head1 VERSION
 
@@ -18,7 +18,7 @@ Version 0.99
 
 =head1 SYNOPSIS
 
-    lms [options] command/library
+    chot [options] command/library
 
   OPTIONS
      -1   --one           Stop at the first match
@@ -39,17 +39,17 @@ Version 0.99
           --bat-theme     Set bat theme per mode (light=X dark=X)
 
   EXAMPLES
-    lms greple              # Look at a script command
-    lms Getopt::Long        # Look at a Perl module
-    lms --py json           # Look at a Python module
-    lms --rb json           # Look at a Ruby library
-    lms --nd express        # Look at a Node.js module
-    lms -l greple           # Show file path only
-    lms --py -m json        # Show documentation
+    chot greple              # Look at a script command
+    chot Getopt::Long        # Look at a Perl module
+    chot --py json           # Look at a Python module
+    chot --rb json           # Look at a Ruby library
+    chot --nd express        # Look at a Node.js module
+    chot -l greple           # Show file path only
+    chot --py -m json        # Show documentation
 
 =head1 DESCRIPTION
 
-B<lms> (Let Me See) is a utility to locate and display command or library files.
+B<chot> is a utility to locate and display command or library source files.
 
 It is convenient to see a command file written in shell or any other
 script language.
@@ -121,7 +121,7 @@ Display version information and exit.
 =item B<-p>, B<--pager> I<command>
 
 Specify the pager command to use for displaying files.
-Defaults to the C<$LMS_PAGER> environment variable, or C<bat> if available,
+Defaults to the C<$CHOT_PAGER> environment variable, or C<bat> if available,
 otherwise C<less>.
 
 When multiple files are found, C<bat> displays all files continuously
@@ -143,10 +143,10 @@ Available handlers:
 - C<Node>: Search for Node.js modules using C<require.resolve>
 
 Examples:
-    lms --type Perl Getopt::Long       # Only search Perl modules
-    lms --type python json             # Only search Python modules
-    lms --type ruby yaml               # Only search Ruby libraries
-    lms --type node express            # Only search Node.js modules
+    chot --type Perl Getopt::Long       # Only search Perl modules
+    chot --type python json             # Only search Python modules
+    chot --type ruby yaml               # Only search Ruby libraries
+    chot --type node express            # Only search Node.js modules
 
 =item B<--py>
 
@@ -199,28 +199,28 @@ implement a C<get_path($app, $name)> method.
 
 =over 7
 
-=item B<App::lms::Command>
+=item B<App::chot::Command>
 
 Handler for executable commands. Searches through C<$PATH> environment
 variable to find executable files.
 
-=item B<App::lms::Perl>
+=item B<App::chot::Perl>
 
 Handler for Perl modules. Searches through C<@INC> paths to find
 Perl module files (.pm and .pl files).
 
-=item B<App::lms::Python>
+=item B<App::chot::Python>
 
 Handler for Python libraries. Executes Python's C<inspect.getsourcefile()>
 function to locate Python module files.
 
-=item B<App::lms::Ruby>
+=item B<App::chot::Ruby>
 
 Handler for Ruby libraries. Loads the specified library with C<require>
 and inspects C<$LOADED_FEATURES> to find the actual file path.
 Documentation is displayed using C<ri>.
 
-=item B<App::lms::Node>
+=item B<App::chot::Node>
 
 Handler for Node.js modules. Uses C<require.resolve> with global paths
 to locate module entry points.
@@ -231,61 +231,61 @@ Documentation is opened via C<npm docs>.
 =head1 EXAMPLES
 
     # Display a script command (brew is a shell script)
-    lms brew
+    chot brew
 
     # Display a Perl module
-    lms List::Util
+    chot List::Util
 
     # Display a Python module
-    lms --py json
+    chot --py json
 
     # Just show the file path
-    lms -l brew
+    chot -l brew
 
     # Show detailed file information
-    lms -ll Getopt::Long
+    chot -ll Getopt::Long
 
     # Show documentation (perldoc for Perl, pydoc for Python, ri for Ruby, etc.)
-    lms -m List::Util
-    lms --py -m json
-    lms --rb -m json
-    lms -m ls
+    chot -m List::Util
+    chot --py -m json
+    chot --rb -m json
+    chot -m ls
 
     # Only search for Perl modules
-    lms --pl Data::Dumper
+    chot --pl Data::Dumper
 
     # Only search for Python modules
-    lms --py os.path
+    chot --py os.path
 
     # Display a Ruby library
-    lms --rb yaml
+    chot --rb yaml
 
     # Display a Node.js module
-    lms --nd express
+    chot --nd express
 
     # Use a custom pager
-    lms --pager "vim -R" List::Util
+    chot --pager "vim -R" List::Util
 
     # Pass options to the pager (use -- to separate)
-    lms -- +10 List::Util  # Open at line 10
+    chot -- +10 List::Util  # Open at line 10
 
 =head1 INSTALLATION
 
     # Homebrew
     brew tap tecolicom/tap
-    brew install app-lms
+    brew install app-chot
 
     # From CPAN
-    cpanm App::lms
+    cpanm App::chot
 
     # From GitHub
-    cpanm https://github.com/kaz-utashiro/App-lms.git
+    cpanm https://github.com/tecolicom/App-chot.git
 
 =head1 ENVIRONMENT
 
 =over 7
 
-=item B<LMS_PAGER>
+=item B<CHOT_PAGER>
 
 Default pager command to use when displaying files.
 If not set, C<bat> is used if available, otherwise C<less>.
@@ -304,7 +304,7 @@ If set, overrides the default skip pattern for the C<--skip> option.
 
 =head1 SEE ALSO
 
-L<App::lms>, L<Getopt::EX>, L<Getopt::EX::Hashed>
+L<App::chot>, L<Getopt::EX>, L<Getopt::EX::Hashed>
 
 =head1 AUTHOR
 

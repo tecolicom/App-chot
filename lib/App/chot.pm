@@ -1,4 +1,4 @@
-package App::lms;
+package App::chot;
 
 our $VERSION = "0.99";
 
@@ -10,7 +10,7 @@ use Encode;
 use open IO => 'utf8', ':std';
 use Pod::Usage;
 use List::Util qw(any first);
-use App::lms::Util;
+use App::chot::Util;
 use Text::ParseWords qw(shellwords);
 
 use Getopt::EX::Hashed; {
@@ -52,14 +52,14 @@ sub run {
     my $name = pop @ARGV;
     if (!defined $name) {
 	if ($app->man) {
-	    my $script = $ENV{LMS_SCRIPT_PATH} // $0;
+	    my $script = $ENV{CHOT_SCRIPT_PATH} // $0;
 	    exec 'perldoc', $script;
 	    die "perldoc: $!\n";
 	}
 	pod2usage();
     }
     my @option = splice @ARGV;
-    my $pager = $app->pager || $ENV{'LMS_PAGER'} || _default_pager($app);
+    my $pager = $app->pager || $ENV{'CHOT_PAGER'} || _default_pager($app);
 
     my @found;
     my $found_type;
@@ -189,16 +189,16 @@ __END__
 
 =head1 NAME
 
-lms - Let Me See command
+chot - command and library source viewer
 
 =head1 SYNOPSIS
 
-lms command/library
+chot command/library
 
 =head1 DESCRIPTION
 
 Document is included in executable script.
-Use `perldoc lms`.
+Use `perldoc chot`.
 
 =head1 AUTHOR
 
