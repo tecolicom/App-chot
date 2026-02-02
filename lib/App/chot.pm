@@ -1,6 +1,6 @@
 package App::chot;
 
-our $VERSION = "0.99";
+our $VERSION = "1.00";
 
 use v5.14;
 use warnings;

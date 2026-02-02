@@ -70,7 +70,7 @@
          "web" : "https://github.com/tecolicom/App-chot"
       }
    },
-   "version" : "0.99",
+   "version" : "1.00",
    "x_authority" : "cpan:UTASHIRO",
    "x_contributors" : [
       "Kazumasa Utashiro <kaz@utashiro.com>"

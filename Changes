@@ -2,6 +2,14 @@ Revision history for "chot" command
 
 {{$NEXT}}
 
+1.00 2026-02-02T06:31:07Z
+
+    - Add optex symlink detection and resolution (App::chot::Optex)
+    - Add -i/--info option to show command trace without source display
+    - Resolve pyenv shims to actual executables in info mode
+    - Resolve optex aliases from config.toml
+    - Rename to "Command Heuristic Omni-Tracer"
+
 0.99 2026-02-02T02:29:53Z
 
     - Add Node.js handler (--nd) using require.resolve with subpath support.

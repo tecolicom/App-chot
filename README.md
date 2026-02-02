@@ -5,7 +5,7 @@ chot - Command Heuristic Omni-Tracer
 
 # VERSION
 
-Version 0.99
+Version 1.00
 
 # SYNOPSIS
 
