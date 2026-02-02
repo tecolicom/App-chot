@@ -31,6 +31,8 @@ use Getopt::EX::Hashed; {
     has type    => ' t =s  ' , default => 'Command:Perl:Python' ;
     has py      => '       ' , action => sub { $_->type('Python') } ;
     has pl      => '       ' , action => sub { $_->type('Perl') } ;
+    has bat_theme => '   %   ' ,
+	default => { light => 'Coldark-Cold', dark => 'Coldark-Dark' } ;
     has skip    => '   =s@ ' ,
 	default => [ $ENV{OPTEX_BINDIR} || ".optex.d/bin" ] ;
 } no Getopt::EX::Hashed;
@@ -55,7 +57,7 @@ sub run {
 	pod2usage();
     }
     my @option = splice @ARGV;
-    my $pager = $app->pager || $ENV{'LMS_PAGER'} || _default_pager();
+    my $pager = $app->pager || $ENV{'LMS_PAGER'} || _default_pager($app);
 
     my @found;
     my $found_type;
@@ -143,10 +145,26 @@ sub valid {
 }
 
 sub _default_pager {
+    my $app = shift;
     state $pager = do {
 	my $bat = first { -x } map { "$_/bat" } split /:/, $ENV{PATH};
-	$bat ? "$bat --force-colorization" : 'less';
+	if ($bat) {
+	    $ENV{BAT_THEME} //= _bat_theme($app->bat_theme);
+	    "$bat --force-colorization";
+	} else {
+	    'less';
+	}
     };
+}
+
+sub _bat_theme {
+    my $themes = shift;
+    my $lum = eval {
+	require Getopt::EX::termcolor;
+	Getopt::EX::termcolor::get_luminance();
+    };
+    return () unless defined $lum;
+    $themes->{$lum < 50 ? 'dark' : 'light'};
 }
 
 sub _normalize_type {

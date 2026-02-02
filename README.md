@@ -25,6 +25,7 @@ Version 0.20
        -t   --type=#        Specify handler (Command:Perl:Python)
             --py            Shortcut for --type Python
             --pl            Shortcut for --type Perl
+            --bat-theme     Set bat theme per mode (light=X dark=X)
 
     EXAMPLES
       lms greple              # Look at a script command
@@ -134,6 +135,18 @@ for understanding how wrapper scripts delegate to their implementations.
 
     Shortcut for `--type Perl`. Search only Perl modules.
 
+- **--bat-theme** _mode_=_theme_
+
+    Specify the default bat theme for light or dark terminal backgrounds.
+    Can be used multiple times.
+
+        --bat-theme light=GitHub --bat-theme dark=Monokai
+
+    If `bat` is used as the pager and `BAT_THEME` is not set, the
+    terminal background luminance is detected and the appropriate theme
+    is applied.  Built-in defaults are `Coldark-Cold` for light and
+    `Coldark-Dark` for dark backgrounds.
+
 - **--suffix** _extension_
 
     Specify file suffix/extension to search for (mainly for Perl modules).
@@ -220,6 +233,12 @@ implement a `get_path($app, $name)` method.
 
     Default pager command to use when displaying files.
     If not set, `bat` is used if available, otherwise `less`.
+
+- **BAT\_THEME**
+
+    Theme for `bat` pager.  If set, takes precedence over `--bat-theme`
+    option and automatic detection.  See `bat --list-themes` for available
+    themes.
 
 - **OPTEX\_BINDIR**
 

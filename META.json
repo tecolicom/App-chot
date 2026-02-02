@@ -46,6 +46,7 @@
             "Encode" : "0",
             "Getopt::EX::Hashed" : "1.05",
             "Getopt::EX::Long" : "0",
+            "Getopt::EX::termcolor" : "0",
             "List::Util" : "0",
             "Pod::Usage" : "0",
             "perl" : "v5.24.0"
