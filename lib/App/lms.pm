@@ -28,9 +28,11 @@ use Getopt::EX::Hashed; {
     has version => ' v     ' , action => sub { say "Version: $VERSION"; exit } ;
     has pager   => ' p =s  ' ;
     has suffix  => '   =s  ' , default => [ qw( .pm ) ] ;
-    has type    => ' t =s  ' , default => 'Command:Perl:Python' ;
+    has type    => ' t =s  ' , default => 'Command:Perl:Python:Ruby:Node' ;
     has py      => '       ' , action => sub { $_->type('Python') } ;
     has pl      => '       ' , action => sub { $_->type('Perl') } ;
+    has rb      => '       ' , action => sub { $_->type('Ruby') } ;
+    has nd      => '       ' , action => sub { $_->type('Node') } ;
     has bat_theme => '   %   ' ,
 	default => { light => 'Coldark-Cold', dark => 'Coldark-Dark' } ;
     has skip    => '   =s@ ' ,
@@ -173,6 +175,8 @@ sub _normalize_type {
 	command => 'Command',
 	perl    => 'Perl',
 	python  => 'Python',
+	ruby    => 'Ruby',
+	node    => 'Node',
     };
     $map->{lc $type} // ucfirst lc $type;
 }

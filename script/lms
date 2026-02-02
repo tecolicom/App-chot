@@ -31,15 +31,19 @@ Version 0.21
      -r   --raw           Don't resolve Homebrew wrappers
      -v   --version       Print version
      -p   --pager=#       Specify pager command
-     -t   --type=#        Specify handler (Command:Perl:Python)
+     -t   --type=#        Specify handler (Command:Perl:Python:Ruby:Node)
           --py            Shortcut for --type Python
           --pl            Shortcut for --type Perl
+          --rb            Shortcut for --type Ruby
+          --nd            Shortcut for --type Node
           --bat-theme     Set bat theme per mode (light=X dark=X)
 
   EXAMPLES
     lms greple              # Look at a script command
     lms Getopt::Long        # Look at a Perl module
     lms --py json           # Look at a Python module
+    lms --rb json           # Look at a Ruby library
+    lms --nd express        # Look at a Node.js module
     lms -l greple           # Show file path only
     lms --py -m json        # Show documentation
 
@@ -50,11 +54,11 @@ B<lms> (Let Me See) is a utility to locate and display command or library files.
 It is convenient to see a command file written in shell or any other
 script language.
 
-For library files, Perl modules are fully supported, and experimental support
-for Python libraries is included.
+For library files, Perl modules are fully supported, and support
+for Python, Ruby, and Node.js libraries is included.
 
-The program searches through all file type handlers (Command, Perl, Python
-by default) and displays all matches found using a pager.
+The program searches through all file type handlers (Command, Perl, Python,
+Ruby, Node by default) and displays all matches found using a pager.
 
 For Homebrew-installed commands, both the wrapper script in C<bin/> and
 the actual executable in C<libexec/bin/> are displayed. This is useful
@@ -92,6 +96,8 @@ Use multiple times (C<-ll>) to call C<ls -l> for detailed file information.
 Display manual/documentation using the appropriate tool for each language:
 - Perl: C<perldoc>
 - Python: C<pydoc>
+- Ruby: C<ri>
+- Node.js: C<npm docs>
 - Command: C<man>
 
 =item B<-N>, B<--number>, B<--no-number>
@@ -127,16 +133,20 @@ next file and C<:p> for the previous file.
 Specify which file type handlers to use and in what order.
 Handlers are specified as colon-separated names (case-insensitive).
 
-Default: C<Command:Perl:Python>
+Default: C<Command:Perl:Python:Ruby:Node>
 
 Available handlers:
 - C<Command>: Search for executable commands in C<$PATH>
 - C<Perl>: Search for Perl modules in C<@INC>
 - C<Python>: Search for Python libraries using Python's inspect module
+- C<Ruby>: Search for Ruby libraries using C<$LOADED_FEATURES>
+- C<Node>: Search for Node.js modules using C<require.resolve>
 
 Examples:
     lms --type Perl Getopt::Long       # Only search Perl modules
     lms --type python json             # Only search Python modules
+    lms --type ruby yaml               # Only search Ruby libraries
+    lms --type node express            # Only search Node.js modules
 
 =item B<--py>
 
@@ -145,6 +155,14 @@ Shortcut for C<--type Python>. Search only Python modules.
 =item B<--pl>
 
 Shortcut for C<--type Perl>. Search only Perl modules.
+
+=item B<--rb>
+
+Shortcut for C<--type Ruby>. Search only Ruby libraries.
+
+=item B<--nd>
+
+Shortcut for C<--type Node>. Search only Node.js modules.
 
 =item B<--bat-theme> I<mode>=I<theme>
 
@@ -196,6 +214,18 @@ Perl module files (.pm and .pl files).
 Handler for Python libraries. Executes Python's C<inspect.getsourcefile()>
 function to locate Python module files.
 
+=item B<App::lms::Ruby>
+
+Handler for Ruby libraries. Loads the specified library with C<require>
+and inspects C<$LOADED_FEATURES> to find the actual file path.
+Documentation is displayed using C<ri>.
+
+=item B<App::lms::Node>
+
+Handler for Node.js modules. Uses C<require.resolve> with global paths
+to locate module entry points.
+Documentation is opened via C<npm docs>.
+
 =back
 
 =head1 EXAMPLES
@@ -215,9 +245,10 @@ function to locate Python module files.
     # Show detailed file information
     lms -ll Getopt::Long
 
-    # Show documentation (perldoc for Perl, pydoc for Python, man for commands)
+    # Show documentation (perldoc for Perl, pydoc for Python, ri for Ruby, etc.)
     lms -m List::Util
     lms --py -m json
+    lms --rb -m json
     lms -m ls
 
     # Only search for Perl modules
@@ -225,6 +256,12 @@ function to locate Python module files.
 
     # Only search for Python modules
     lms --py os.path
+
+    # Display a Ruby library
+    lms --rb yaml
+
+    # Display a Node.js module
+    lms --nd express
 
     # Use a custom pager
     lms --pager "vim -R" List::Util

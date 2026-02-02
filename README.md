@@ -22,15 +22,19 @@ Version 0.21
        -r   --raw           Don't resolve Homebrew wrappers
        -v   --version       Print version
        -p   --pager=#       Specify pager command
-       -t   --type=#        Specify handler (Command:Perl:Python)
+       -t   --type=#        Specify handler (Command:Perl:Python:Ruby:Node)
             --py            Shortcut for --type Python
             --pl            Shortcut for --type Perl
+            --rb            Shortcut for --type Ruby
+            --nd            Shortcut for --type Node
             --bat-theme     Set bat theme per mode (light=X dark=X)
 
     EXAMPLES
       lms greple              # Look at a script command
       lms Getopt::Long        # Look at a Perl module
       lms --py json           # Look at a Python module
+      lms --rb json           # Look at a Ruby library
+      lms --nd express        # Look at a Node.js module
       lms -l greple           # Show file path only
       lms --py -m json        # Show documentation
 
@@ -41,11 +45,11 @@ Version 0.21
 It is convenient to see a command file written in shell or any other
 script language.
 
-For library files, Perl modules are fully supported, and experimental support
-for Python libraries is included.
+For library files, Perl modules are fully supported, and support
+for Python, Ruby, and Node.js libraries is included.
 
-The program searches through all file type handlers (Command, Perl, Python
-by default) and displays all matches found using a pager.
+The program searches through all file type handlers (Command, Perl, Python,
+Ruby, Node by default) and displays all matches found using a pager.
 
 For Homebrew-installed commands, both the wrapper script in `bin/` and
 the actual executable in `libexec/bin/` are displayed. This is useful
@@ -81,6 +85,8 @@ for understanding how wrapper scripts delegate to their implementations.
     Display manual/documentation using the appropriate tool for each language:
     \- Perl: `perldoc`
     \- Python: `pydoc`
+    \- Ruby: `ri`
+    \- Node.js: `npm docs`
     \- Command: `man`
 
 - **-N**, **--number**, **--no-number**
@@ -116,16 +122,20 @@ for understanding how wrapper scripts delegate to their implementations.
     Specify which file type handlers to use and in what order.
     Handlers are specified as colon-separated names (case-insensitive).
 
-    Default: `Command:Perl:Python`
+    Default: `Command:Perl:Python:Ruby:Node`
 
     Available handlers:
     \- `Command`: Search for executable commands in `$PATH`
     \- `Perl`: Search for Perl modules in `@INC`
     \- `Python`: Search for Python libraries using Python's inspect module
+    \- `Ruby`: Search for Ruby libraries using `$LOADED_FEATURES`
+    \- `Node`: Search for Node.js modules using `require.resolve`
 
     Examples:
         lms --type Perl Getopt::Long       # Only search Perl modules
         lms --type python json             # Only search Python modules
+        lms --type ruby yaml               # Only search Ruby libraries
+        lms --type node express            # Only search Node.js modules
 
 - **--py**
 
@@ -134,6 +144,14 @@ for understanding how wrapper scripts delegate to their implementations.
 - **--pl**
 
     Shortcut for `--type Perl`. Search only Perl modules.
+
+- **--rb**
+
+    Shortcut for `--type Ruby`. Search only Ruby libraries.
+
+- **--nd**
+
+    Shortcut for `--type Node`. Search only Node.js modules.
 
 - **--bat-theme** _mode_=_theme_
 
@@ -181,6 +199,18 @@ implement a `get_path($app, $name)` method.
     Handler for Python libraries. Executes Python's `inspect.getsourcefile()`
     function to locate Python module files.
 
+- **App::lms::Ruby**
+
+    Handler for Ruby libraries. Loads the specified library with `require`
+    and inspects `$LOADED_FEATURES` to find the actual file path.
+    Documentation is displayed using `ri`.
+
+- **App::lms::Node**
+
+    Handler for Node.js modules. Uses `require.resolve` with global paths
+    to locate module entry points.
+    Documentation is opened via `npm docs`.
+
 # EXAMPLES
 
     # Display a script command (brew is a shell script)
@@ -198,9 +228,10 @@ implement a `get_path($app, $name)` method.
     # Show detailed file information
     lms -ll Getopt::Long
 
-    # Show documentation (perldoc for Perl, pydoc for Python, man for commands)
+    # Show documentation (perldoc for Perl, pydoc for Python, ri for Ruby, etc.)
     lms -m List::Util
     lms --py -m json
+    lms --rb -m json
     lms -m ls
 
     # Only search for Perl modules
@@ -208,6 +239,12 @@ implement a `get_path($app, $name)` method.
 
     # Only search for Python modules
     lms --py os.path
+
+    # Display a Ruby library
+    lms --rb yaml
+
+    # Display a Node.js module
+    lms --nd express
 
     # Use a custom pager
     lms --pager "vim -R" List::Util
