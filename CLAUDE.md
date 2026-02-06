@@ -39,7 +39,7 @@ Auto-generated files (do not edit directly):
 3. **Handler Modules** (each implements `get_path($app, $name)`):
    - `App::chot::Command` - Searches `$PATH`, resolves optex/Homebrew/pyenv
    - `App::chot::Perl` - Searches `@INC` for .pm/.pl files
-   - `App::chot::Python` - Uses `inspect.getsourcefile()` via python3
+   - `App::chot::Python` - Uses `inspect.getsourcefile()` via python3; normalizes hyphens to underscores; traces `__init__.py` to `main.py` etc.
    - `App::chot::Ruby` - Uses `$LOADED_FEATURES` inspection
    - `App::chot::Node` - Uses `require.resolve` with global paths
 
@@ -55,6 +55,7 @@ Auto-generated files (do not edit directly):
    ```
    PATH search -> resolve_optex_command -> detect_pyenv_shim -> resolve_homebrew_wrapper -> _uniq
    ```
+   `detect_pyenv_shim` resolves shims via `pyenv which` and returns both the shim and the real path.
    Also provides `get_info()` for `-i` mode with labeled output per path.
 
 6. **Utilities** (`lib/App/chot/Util.pm`): `is_binary()` for binary file detection.
@@ -127,4 +128,38 @@ $ chot -i ping
 $ chot -i 2up
   alias: 2up = env LESSOPEN="| ansicolumn -DPC2 %s " less +Gg
   optex:       ~/.optex.d/bin/2up -> .../optex
+```
+
+### pyenv shim resolution and Python tracing improvements (2026-02-06)
+
+**Problem 1**: `chot pandoc-embedz` failed to find the Python source because the module name contains a hyphen. Python's `import` requires underscores (`pandoc_embedz`), but the validation `$name =~ /[^\w\.]/` rejected the hyphen before import was attempted.
+
+**Problem 2**: `detect_pyenv_shim` in Command.pm only logged the shim path but did not resolve it. The actual executable (e.g., `/Users/.../.pyenv/versions/.../bin/pandoc-embedz`) was not shown.
+
+**Problem 3**: When Python's `inspect.getsourcefile()` returned `__init__.py` with actual content (not empty), `_find_alternative` was not called, so the real entry point (`main.py`) was not discovered.
+
+**Solution**:
+
+1. **Hyphen normalization** (`Python.pm`): Convert hyphens to underscores before validation and import (`pandoc-embedz` → `pandoc_embedz`). This follows Python packaging convention.
+2. **pyenv shim resolution** (`Command.pm`): `detect_pyenv_shim` now calls `pyenv which` to resolve the actual executable and returns both the shim and the real path.
+3. **`__init__.py` entry point search** (`Python.pm`): Always search for alternative files when `__init__.py` is found, not just when empty. Added `main.py` to the candidate list. Empty `__init__.py` returns only the alternative; non-empty returns both.
+
+**`_find_alternative` search order**:
+1. `$base.py` (module-name matching file, e.g., `gpty.py`)
+2. `main.py` (CLI entry point)
+3. `__main__.py`
+4. First non-empty `.py` file (fallback)
+
+**Example output**:
+```
+$ chot -l pandoc-embedz
+/Users/utashiro/.pyenv/shims/pandoc-embedz
+/Users/utashiro/.pyenv/versions/3.10.2/bin/pandoc-embedz
+.../pandoc_embedz/__init__.py
+.../pandoc_embedz/main.py
+
+$ chot -l gpty
+/Users/utashiro/.pyenv/shims/gpty
+/Users/utashiro/.pyenv/versions/3.10.2/bin/gpty
+.../gpty/gpty.py
 ```
