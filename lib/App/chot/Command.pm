@@ -147,11 +147,18 @@ sub resolve_optex_command {
     resolve_optex($app, $name, $path);
 }
 
-# pyenv shim を検出してログ出力
+# pyenv shim を検出して実体を解決
 sub detect_pyenv_shim {
     my $path = shift;
-    if ($path =~ m{/\.pyenv/shims/}) {
-	warn "  Found pyenv shim: $path\n" if $DEBUG;
+    return $path unless $path =~ m{/\.pyenv/shims/(.+)};
+    my $name = $1;
+    warn "  Found pyenv shim: $path\n" if $DEBUG;
+    return $path if $RAW;
+    my $real = `pyenv which \Q$name\E 2>/dev/null`;
+    chomp $real;
+    if ($real && -x $real) {
+	warn "  Resolved pyenv shim: $real\n" if $DEBUG;
+	return ($path, $real);
     }
     return $path;
 }

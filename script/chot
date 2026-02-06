@@ -73,6 +73,93 @@ Configuration files (C<~/.optex.d/NAME.rc>) are also included in
 the results.  Use C<-i> to see the full resolution chain including
 alias definitions.
 
+=head1 TRACING MECHANISM
+
+B<chot> traces commands and libraries through multiple layers of
+indirection to find the actual source files.
+
+=head2 Command Tracing
+
+The Command handler resolves commands through the following pipeline:
+
+    PATH search → optex resolution → pyenv shim resolution → Homebrew wrapper resolution
+
+=over 4
+
+=item 1. B<PATH search>
+
+Searches C<$PATH> directories for executable files matching the given
+name.
+
+=item 2. B<optex resolution>
+
+If the found path is a symlink to the L<optex|App::optex> binary
+(typically in C<~/.optex.d/bin/>), resolves it to the actual command
+by searching C<$PATH> (skipping other optex symlinks).  Alias
+definitions in C<~/.optex.d/config.toml> and configuration files
+(C<~/.optex.d/NAME.rc>) are also included.
+
+=item 3. B<pyenv shim resolution>
+
+If the path is a pyenv shim (in C<~/.pyenv/shims/>), resolves it to
+the actual executable using C<pyenv which>.  Both the shim and the
+resolved path are included in the output.
+
+=item 4. B<Homebrew wrapper resolution>
+
+If the path is in a Homebrew prefix (e.g., C</opt/homebrew/bin/>),
+checks whether it is a shell wrapper that delegates to a script in
+C<libexec/bin/>.  If so, both the wrapper and the actual script are
+included.
+
+=back
+
+=head2 Python Module Tracing
+
+The Python handler performs additional resolution to locate meaningful
+source files:
+
+=over 4
+
+=item B<Name normalization>
+
+Hyphens in command names are converted to underscores for Python
+module lookup (e.g., C<pandoc-embedz> is searched as C<pandoc_embedz>).
+This follows the Python packaging convention where distribution names
+use hyphens but module names use underscores.
+
+=item B<Entry point resolution>
+
+When the Python module resolves to an C<__init__.py> file, the handler
+searches for a more substantive source file in this order:
+
+=over 4
+
+=item 1. A file matching the module name (e.g., C<gpty.py> for C<gpty>)
+
+=item 2. C<main.py> (common entry point for CLI tools)
+
+=item 3. C<__main__.py>
+
+=item 4. The first non-empty C<.py> file in the package directory
+
+=back
+
+If C<__init__.py> is empty, only the alternative file is returned.
+If C<__init__.py> has content, both files are included.
+
+=back
+
+=head2 Example
+
+For a pyenv-installed Python command C<pandoc-embedz>:
+
+    $ chot -l pandoc-embedz
+    /Users/you/.pyenv/shims/pandoc-embedz        # pyenv shim
+    /Users/you/.pyenv/versions/.../bin/pandoc-embedz  # actual entry point
+    .../pandoc_embedz/__init__.py                 # package init
+    .../pandoc_embedz/main.py                     # main source
+
 =head1 OPTIONS
 
 =over 7

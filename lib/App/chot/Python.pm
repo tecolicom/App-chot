@@ -21,14 +21,17 @@ sub get_path {
     };
     warn "  Using: $python\n" if $DEBUG;
 
+    # Normalize: Python module names use underscores, not hyphens
+    (my $module = $name) =~ s/-/_/g;
+
     # Validate module name (only allow word chars and dots)
-    return if $name =~ /[^\w\.]/;
+    return if $module =~ /[^\w\.]/;
 
     my $code = <<"END";
 import inspect
 try:
-    exec('import $name')
-    path = inspect.getsourcefile(eval('$name'))
+    exec('import $module')
+    path = inspect.getsourcefile(eval('$module'))
     if path:
         print(path)
 except:
@@ -39,12 +42,12 @@ END
     chomp $path;
     if ($path && -f $path) {
         warn "  Found: $path\n" if $DEBUG;
-        # If __init__.py is empty, look for alternative files
-        if ($path =~ m{/__init__\.py$} && -z $path) {
-            warn "  Empty __init__.py, searching alternatives\n" if $DEBUG;
-            if (my $alt = _find_alternative($path, $name)) {
+        # If __init__.py, look for main entry point
+        if ($path =~ m{/__init__\.py$}) {
+            if (my $alt = _find_alternative($path, $module)) {
                 warn "  Alternative: $alt\n" if $DEBUG;
-                return $alt;
+                return $alt if -z $path;  # skip empty __init__.py
+                return ($path, $alt);
             }
         }
         return $path;
@@ -61,9 +64,10 @@ sub _find_alternative {
     my $base = $name;
     $base =~ s/.*\.//;
 
-    # Search order: same-name module, __main__.py, other .py files
+    # Search order: same-name module, main.py, __main__.py
     my @candidates = (
         "$dir/$base.py",
+        "$dir/main.py",
         "$dir/__main__.py",
     );
 
