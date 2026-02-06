@@ -2,6 +2,13 @@ Revision history for "chot" command
 
 {{$NEXT}}
 
+1.01 2026-02-06T06:33:18Z
+
+    - Resolve pyenv shims to actual executables in command tracing
+    - Convert hyphens to underscores for Python module lookup
+    - Search for main.py entry point when __init__.py is found
+    - Add TRACING MECHANISM section to manual
+
 1.00 2026-02-02T06:31:07Z
 
     - Add optex symlink detection and resolution (App::chot::Optex)
