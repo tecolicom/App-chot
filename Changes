@@ -2,6 +2,10 @@ Revision history for "chot" command
 
 {{$NEXT}}
 
+1.02 2026-02-07T05:49:07Z
+
+    - Fix detect_optex to not match optex command itself
+
 1.01 2026-02-06T06:33:18Z
 
     - Resolve pyenv shims to actual executables in command tracing

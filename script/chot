@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-our $VERSION = "1.01";
+our $VERSION = "1.02";
 use strict;
 use warnings;
 use App::chot;
@@ -14,7 +14,7 @@ chot - Command Heuristic Omni-Tracer
 
 =head1 VERSION
 
-Version 1.01
+Version 1.02
 
 =head1 SYNOPSIS
 
