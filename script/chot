@@ -415,6 +415,13 @@ resolution.
 
 =back
 
+=head1 BUGS
+
+When inspecting itself with C<chot chot>, the display order of the
+wrapper script and the actual executable may be reversed.  This is
+because the wrapper adds C<libexec/bin> to C<$PATH>, causing the
+raw executable to be found before the wrapper during path search.
+
 =head1 SEE ALSO
 
 L<App::chot>, L<App::optex>, L<Getopt::EX>, L<Getopt::EX::Hashed>
