@@ -16,6 +16,7 @@ sub _optex_dir {
 sub detect_optex {
     my $path = shift;
     return unless -l $path;
+    return if basename($path) eq 'optex'; # optex itself, not managed by optex
     my $target = readlink $path // return;
     basename($target) eq 'optex';
 }
