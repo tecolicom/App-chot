@@ -25,6 +25,7 @@ use Getopt::EX::Hashed; {
 	pod2usage(-verbose => 99, -sections => [qw(SYNOPSIS)])
     } ;
     has list    => ' l +   ' ;
+    has deref   => ' L     ' ;
     has man     => ' m     ' ;
     has number  => ' N !   ' , default => 0 ;
     has version => ' v     ' , action => sub { say "Version: $VERSION"; exit } ;
@@ -105,7 +106,7 @@ sub run {
 
     if (my $level = $app->list) {
 	if ($level > 1) {
-	    system 'ls', '-l', @found;
+	    system 'ls', ($app->deref ? '-lL' : '-l'), @found;
 	} else {
 	    say for @found;
 	}

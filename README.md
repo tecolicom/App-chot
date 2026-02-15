@@ -18,6 +18,7 @@ Version 1.02
        -n   --dryrun        Show command without executing
        -h   --help          Print this message
        -l   --list          Print file path (-ll for ls -l)
+       -L   --deref         Dereference symlinks (with -ll)
        -m   --man           Show documentation
        -N   --[no-]number   Line number display (default: off)
        -r   --raw           Don't resolve Homebrew wrappers
@@ -168,6 +169,12 @@ For a pyenv-installed Python command `pandoc-embedz`:
 
     Print module path instead of displaying the file contents.
     Use multiple times (`-ll`) to call `ls -l` for detailed file information.
+
+- **-L**, **--deref**
+
+    Dereference symlinks when listing with `-ll`.
+    Passes `-L` to `ls` so that the target file's information is shown
+    instead of the symlink itself.
 
 - **-m**, **--man**
 
@@ -378,6 +385,13 @@ implement a `get_path($app, $name)` method.
     Root directory for optex configuration.  Defaults to `~/.optex.d`.
     Used to locate `config.toml` and `*.rc` files for optex command
     resolution.
+
+# BUGS
+
+When inspecting itself with `chot chot`, the display order of the
+wrapper script and the actual executable may be reversed.  This is
+because the wrapper adds `libexec/bin` to `$PATH`, causing the
+raw executable to be found before the wrapper during path search.
 
 # SEE ALSO
 
