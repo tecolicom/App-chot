@@ -1,14 +1,14 @@
-package App::chot::Handler;
+package App::chot::Finder;
 use v5.14;
 use warnings;
 
 =head1 DESCRIPTION
 
-Base class for all chot handler modules (Command, Perl, Python, Ruby, Node).
+Base class for all chot finder modules (Command, Perl, Python, Ruby, Node).
 
-Subclasses inherit C<new()> and accessor methods, and override handler methods.
+Subclasses inherit C<new()> and accessor methods, and override finder methods.
 
-Handler contract:
+Finder contract:
 
 =over 4
 
@@ -23,7 +23,7 @@ Prints trace/resolution info to STDERR for C<-i> mode.
 =item B<man_cmd()> (optional)
 
 Returns a command list for displaying documentation.
-Returns empty list to skip (allowing fallback to the next handler).
+Returns empty list to skip (allowing fallback to the next finder).
 
 =back
 
@@ -32,18 +32,18 @@ Returns empty list to skip (allowing fallback to the next handler).
 sub new {
     my($class, %args) = @_;
     bless {
-        app     => $args{app},      # App::chot option object
-        name    => $args{name},      # target command/module name
-        context => $args{context},   # App::chot::Context shared state
+        app   => $args{app},    # App::chot option object
+        name  => $args{name},   # target command/module name
+        found => $args{found},  # App::chot::Found shared results
     }, $class;
 }
 
 #
 # lvalue accessors: readable and writable (e.g., $self->name = 'foo')
 #
-sub app     : lvalue { $_[0]{app} }
-sub name    : lvalue { $_[0]{name} }
-sub context : lvalue { $_[0]{context} }
+sub app   : lvalue { $_[0]{app} }
+sub name  : lvalue { $_[0]{name} }
+sub found : lvalue { $_[0]{found} }
 
 #
 # Shortcut for $self->app->debug

@@ -2,7 +2,7 @@ package App::chot::Command;
 use v5.14;
 use warnings;
 
-use parent 'App::chot::Handler';
+use parent 'App::chot::Finder';
 
 use App::chot::Optex qw(detect_optex resolve_optex);
 use File::Basename qw(basename dirname);

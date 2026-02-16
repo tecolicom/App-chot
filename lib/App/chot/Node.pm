@@ -3,7 +3,7 @@ package App::chot::Node;
 use v5.14;
 use warnings;
 
-use parent 'App::chot::Handler';
+use parent 'App::chot::Finder';
 
 use Command::Run;
 

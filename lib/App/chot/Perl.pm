@@ -2,7 +2,7 @@ package App::chot::Perl;
 use v5.14;
 use warnings;
 
-use parent 'App::chot::Handler';
+use parent 'App::chot::Finder';
 
 use Digest::MD5;
 
@@ -13,7 +13,7 @@ use Digest::MD5;
 #
 sub man_cmd {
     my $self = shift;
-    my @paths = $self->context->paths_for('Perl');
+    my @paths = $self->found->paths_for('Perl');
     return unless @paths;
     return ('perldoc', '-F', $paths[0]);
 }

@@ -12,7 +12,7 @@ use Pod::Usage;
 use List::Util qw(any first);
 use App::chot::Util;
 use App::chot::Optex qw(detect_optex);
-use App::chot::Context;
+use App::chot::Found;
 use Text::ParseWords qw(shellwords);
 
 use Getopt::EX::Hashed; {
@@ -66,25 +66,25 @@ sub run {
     my $pager = $app->pager || $ENV{'CHOT_PAGER'} || _default_pager($app);
 
     #
-    # Load and instantiate all handler objects once.
-    # Each handler gets the same $app, $name, and shared $ctx,
+    # Load and instantiate all finder objects once.
+    # Each finder gets the same $app, $name, and shared $found,
     # and is reused across -i, main, and -m dispatch below.
     #
-    my $ctx = App::chot::Context->new;
-    my @handlers;  # [ [$type, $handler_obj], ... ]
+    my $found = App::chot::Found->new;
+    my @finders;  # [ [$type, $finder_obj], ... ]
     for my $type (split /:+/, $app->type) {
 	$type = _normalize_type($type);
 	my $class = __PACKAGE__ . '::' . $type;
 	eval "require $class" or do { warn $@ if $app->debug; next };
-	push @handlers, [
+	push @finders, [
 	    $type,
-	    $class->new(app => $app, name => $name, context => $ctx),
+	    $class->new(app => $app, name => $name, found => $found),
 	];
     }
 
     # -i mode: print trace/resolution info and exit
     if ($app->info) {
-	for my $pair (@handlers) {
+	for my $pair (@finders) {
 	    my($type, $h) = @$pair;
 	    $h->get_info if $h->can('get_info');
 	}
@@ -92,19 +92,19 @@ sub run {
     }
 
     #
-    # Main discovery loop: try each handler in order.
-    # Results are accumulated in $ctx so that later handlers
+    # Main discovery loop: try each finder in order.
+    # Results are accumulated in $found so that later finders
     # (e.g., Python) can use paths found by earlier ones (e.g., Command).
     #
     my @found;
-    for my $pair (@handlers) {
+    for my $pair (@finders) {
 	my($type, $h) = @$pair;
-	warn "Trying handler: $type\n" if $app->debug;
+	warn "Trying finder: $type\n" if $app->debug;
 	my @paths = grep { defined } $h->get_path;
 	if (@paths) {
 	    warn "Found by $type: @paths\n" if $app->debug;
 	    push @found, @paths;
-	    $ctx->add_result($type, @paths);
+	    $found->add($type, @paths);
 	    last if $app->one;
 	} else {
 	    warn "Not found by $type\n" if $app->debug;
@@ -126,15 +126,15 @@ sub run {
     }
 
     #
-    # -m mode: try each handler's man_cmd in the order results were found.
-    # Handlers return empty list to skip, allowing fallback to the next.
+    # -m mode: try each finder's man_cmd in the order results were found.
+    # Finders return empty list to skip, allowing fallback to the next.
     # Uses exec (not system) to preserve terminal/signal handling.
     #
     if ($app->man) {
-	my %handler_by_type = map { @$_ } @handlers;
+	my %finder_by_type = map { @$_ } @finders;
 	my $tried;
-	for my $type (@{$ctx->found_types}) {
-	    my $h = $handler_by_type{$type} or next;
+	for my $type (@{$found->types}) {
+	    my $h = $finder_by_type{$type} or next;
 	    next unless $h->can('man_cmd');
 	    my @cmd = $h->man_cmd or next;
 	    if ($app->dryrun) {

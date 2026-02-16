@@ -3,7 +3,7 @@ package App::chot::Python;
 use v5.14;
 use warnings;
 
-use parent 'App::chot::Handler';
+use parent 'App::chot::Finder';
 
 use Command::Run;
 
@@ -17,7 +17,7 @@ sub man_cmd {
     (my $module = $self->name) =~ s/-/_/g;
     my $python = $self->_find_python // 'python3';
     # Prefer interpreter from shebang of found paths (e.g., Homebrew venv python)
-    my $found = $self->context->found_paths;
+    my $found = $self->found->paths;
     for my $p (@$found) {
         next unless -f $p && -r $p;
         if (my $shebang_python = _extract_python_from_shebang($p)) {
@@ -56,7 +56,7 @@ sub get_path {
     }
 
     # Fallback: try python interpreters found in shebang of previously discovered paths
-    my $found = $self->context->found_paths;
+    my $found = $self->found->paths;
     for my $path (@$found) {
         next unless -f $path && -r $path;
         my $shebang_python = _extract_python_from_shebang($path) or next;
