@@ -78,7 +78,7 @@ sub run {
     }
 
     my @found;
-    my $found_type;
+    my @found_types;
     for my $type (split /:+/, $app->type) {
 	$type = _normalize_type($type);
 	my $handler = __PACKAGE__ . '::' . $type;
@@ -89,7 +89,8 @@ sub run {
 	    if (@paths) {
 		warn "Found by $type: @paths\n" if $app->debug;
 		push @found, @paths;
-		$found_type //= $type;
+		$App::chot::_found_paths = [@found];
+		push @found_types, $type;
 		last if $app->one;
 	    } else {
 		warn "Not found by $type\n" if $app->debug;
@@ -114,15 +115,22 @@ sub run {
     }
 
     if ($app->man) {
-	my $handler = __PACKAGE__ . '::' . $found_type;
 	no strict 'refs';
-	my @cmd = &{"$handler\::man_cmd"}($app, $name, $found[0]);
-	if ($app->dryrun) {
-	    say "@cmd";
-	    return 0;
+	my $tried;
+	for my $type (@found_types) {
+	    my $handler = __PACKAGE__ . '::' . $type;
+	    next unless defined &{"$handler\::man_cmd"};
+	    my @cmd = &{"$handler\::man_cmd"}($app, $name, $found[0])
+		or next;
+	    if ($app->dryrun) {
+		say "@cmd";
+		$tried++;
+		next;
+	    }
+	    exec @cmd;
+	    die "$type man: $!\n";
 	}
-	exec @cmd;
-	die "$found_type man: $!\n";
+	return $tried ? 0 : 1;
     }
 
     @found = grep { !detect_optex($_) } @found;

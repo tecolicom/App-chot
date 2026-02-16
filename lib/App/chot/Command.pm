@@ -10,6 +10,8 @@ my $RAW;
 
 sub man_cmd {
     my($app, $name, $path) = @_;
+    `man -w \Q$name\E 2>/dev/null`;
+    return if $?;
     return ('man', $name);
 }
 
@@ -109,7 +111,7 @@ sub _info_homebrew {
     my $shebang = <$fh>;
     if ($shebang && $shebang =~ /^#!.*\b(ba)?sh\b/) {
         while (<$fh>) {
-            if (m{exec\s+["']?(\Q$prefix\E/(?:opt|Cellar)/[^"'\s]+/libexec/bin/\S+)}) {
+            if (m{exec\s+["']?(\Q$prefix\E/[^"'\s]+)}) {
                 my $real_path = $1;
                 $real_path =~ s/["'].*//;
                 if (-x $real_path) {
@@ -177,9 +179,9 @@ sub resolve_homebrew_wrapper {
     my $shebang = <$fh>;
     return $path unless $shebang && $shebang =~ /^#!.*\b(ba)?sh\b/;
 
-    # Look for exec line pointing to libexec
+    # Look for exec line pointing to real path
     while (<$fh>) {
-        if (m{exec\s+["']?(\Q$prefix\E/(?:opt|Cellar)/[^"'\s]+/libexec/bin/\S+)}) {
+        if (m{exec\s+["']?(\Q$prefix\E/[^"'\s]+)}) {
             my $real_path = $1;
             $real_path =~ s/["'].*//;
             if (-x $real_path) {

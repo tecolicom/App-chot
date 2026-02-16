@@ -9,7 +9,18 @@ my $DEBUG;
 
 sub man_cmd {
     my($app, $name, $path) = @_;
-    return ('python3', '-m', 'pydoc', $name);
+    (my $module = $name) =~ s/-/_/g;
+    my $python = _find_python() // 'python3';
+    if (my $found = $App::chot::_found_paths) {
+        for my $p (@$found) {
+            next unless -f $p && -r $p;
+            if (my $shebang_python = _extract_python_from_shebang($p)) {
+                $python = $shebang_python;
+                last;
+            }
+        }
+    }
+    return ($python, '-m', 'pydoc', $module);
 }
 
 sub get_path {
@@ -26,6 +37,31 @@ sub get_path {
 
     # Validate module name (only allow word chars and dots)
     return if $module =~ /[^\w\.]/;
+
+    # Try with default python first
+    my @result = _import_source($python, $module);
+    if (@result) {
+        return @result;
+    }
+
+    # Fallback: try python interpreters found in shebang of previously discovered paths
+    if (my $found = $App::chot::_found_paths) {
+        for my $path (@$found) {
+            next unless -f $path && -r $path;
+            my $shebang_python = _extract_python_from_shebang($path) or next;
+            warn "  Trying shebang python: $shebang_python (from $path)\n" if $DEBUG;
+            @result = _import_source($shebang_python, $module);
+            if (@result) {
+                return @result;
+            }
+        }
+    }
+
+    return;
+}
+
+sub _import_source {
+    my($python, $module) = @_;
 
     my $code = <<"END";
 import inspect
@@ -51,6 +87,27 @@ END
             }
         }
         return $path;
+    }
+    return;
+}
+
+sub _extract_python_from_shebang {
+    my $path = shift;
+    open my $fh, '<', $path or return;
+    my $line = <$fh>;
+    close $fh;
+    return unless defined $line && $line =~ /^#!/;
+    # Direct path: #!/path/to/python3
+    if ($line =~ m{^#!\s*(/\S*python\S*)}) {
+        my $python = $1;
+        return $python if -x $python;
+    }
+    # env: #!/usr/bin/env python3
+    if ($line =~ m{^#!\s*/\S*env\s+(python\S*)}) {
+        my $cmd = $1;
+        my $resolved = Command::Run->new->command('which', $cmd)->update->data // return;
+        chomp $resolved;
+        return $resolved if $resolved && -x $resolved;
     }
     return;
 }
