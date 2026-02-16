@@ -21,7 +21,7 @@ Version 1.02
        -L   --deref         Dereference symlinks (with -ll)
        -m   --man           Show documentation
        -N   --[no-]number   Line number display (default: off)
-       -r   --raw           Don't resolve Homebrew wrappers
+       -r   --raw           Don't resolve symlinks/wrappers
        -v   --version       Print version
        -p   --pager=#       Specify pager command
        -t   --type=#        Specify handler (Command:Perl:Python:Ruby:Node)
@@ -54,8 +54,9 @@ The program searches through all file type handlers (Command, Perl, Python,
 Ruby, Node by default) and displays all matches found using a pager.
 
 For Homebrew-installed commands, both the wrapper script in `bin/` and
-the actual executable in `libexec/bin/` are displayed. This is useful
-for understanding how wrapper scripts delegate to their implementations.
+the actual executable (typically in `libexec/`) are displayed. This is
+useful for understanding how wrapper scripts delegate to their
+implementations.
 
 For [optex](https://metacpan.org/pod/App%3A%3Aoptex) commands (symlinks in `~/.optex.d/bin/`
 pointing to the `optex` binary), the actual command is resolved by
@@ -98,9 +99,10 @@ The Command handler resolves commands through the following pipeline:
 - 4. **Homebrew wrapper resolution**
 
     If the path is in a Homebrew prefix (e.g., `/opt/homebrew/bin/`),
-    checks whether it is a shell wrapper that delegates to a script in
-    `libexec/bin/`.  If so, both the wrapper and the actual script are
-    included.
+    checks whether it is a shell wrapper that delegates to another
+    script within the same Homebrew prefix (e.g., in `libexec/bin/` or
+    `libexec/venv/bin/`).  If so, both the wrapper and the actual script
+    are included.
 
 ## Python Module Tracing
 
@@ -136,7 +138,7 @@ source files:
     If `__init__.py` is empty, only the alternative file is returned.
     If `__init__.py` has content, both files are included.
 
-## Example
+## Examples
 
 For a Homebrew-installed Python command `pandoc-embedz`:
 
@@ -183,7 +185,7 @@ For a pyenv-installed Python command:
 
 - **-l**, **--list**
 
-    Print module path instead of displaying the file contents.
+    Print file path instead of displaying the file contents.
     Use multiple times (`-ll`) to call `ls -l` for detailed file information.
 
 - **-L**, **--deref**
@@ -194,12 +196,14 @@ For a pyenv-installed Python command:
 
 - **-m**, **--man**
 
-    Display manual/documentation using the appropriate tool for each language:
-    \- Perl: `perldoc`
-    \- Python: `pydoc`
-    \- Ruby: `ri`
-    \- Node.js: `npm docs`
-    \- Command: `man`
+    Display manual/documentation using the appropriate tool for each
+    language:
+
+        Command:  man
+        Perl:     perldoc
+        Python:   pydoc
+        Ruby:     ri
+        Node.js:  npm docs
 
     If the first handler's documentation is not available (e.g., no man
     page exists), the next handler is tried automatically.  For example,
@@ -216,8 +220,8 @@ For a pyenv-installed Python command:
 
 - **-r**, **--raw**
 
-    Show raw paths without resolving Homebrew wrapper scripts to
-    their actual executables.
+    Show raw paths without resolving optex symlinks, pyenv shims, or
+    Homebrew wrapper scripts to their actual executables.
 
 - **-v**, **--version**
 
@@ -241,13 +245,15 @@ For a pyenv-installed Python command:
     Default: `Command:Perl:Python:Ruby:Node`
 
     Available handlers:
-    \- `Command`: Search for executable commands in `$PATH`
-    \- `Perl`: Search for Perl modules in `@INC`
-    \- `Python`: Search for Python libraries using Python's inspect module
-    \- `Ruby`: Search for Ruby libraries using `$LOADED_FEATURES`
-    \- `Node`: Search for Node.js modules using `require.resolve`
+
+        Command   Search for executable commands in $PATH
+        Perl      Search for Perl modules in @INC
+        Python    Search for Python libraries using inspect module
+        Ruby      Search for Ruby libraries using $LOADED_FEATURES
+        Node      Search for Node.js modules using require.resolve
 
     Examples:
+
         chot --type Perl Getopt::Long       # Only search Perl modules
         chot --type python json             # Only search Python modules
         chot --type ruby yaml               # Only search Ruby libraries
@@ -370,6 +376,12 @@ implement a `get_path($app, $name)` method.
 
     # Display a Node.js module
     chot --nd express
+
+    # Trace a Homebrew venv Python command
+    chot -l pandoc-embedz
+
+    # Show documentation with fallback (man → pydoc)
+    chot -m speedtest-z
 
     # Use a custom pager
     chot --pager "vim -R" List::Util
