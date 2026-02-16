@@ -35,11 +35,13 @@ Auto-generated files (do not edit directly):
    - Dynamically loads handler modules based on `--type` option
    - Three output modes: pager display (default), `-l` (list paths), `-i` (info/trace)
    - Filters optex symlinks from pager display via `detect_optex()`
+   - Accumulates found paths in `$App::chot::_found_paths` for cross-handler use (e.g., Python shebang fallback)
+   - `-m` mode tries each handler's `man_cmd` in order; handlers return empty list to skip
 
 3. **Handler Modules** (each implements `get_path($app, $name)`):
    - `App::chot::Command` - Searches `$PATH`, resolves optex/Homebrew/pyenv
    - `App::chot::Perl` - Searches `@INC` for .pm/.pl files
-   - `App::chot::Python` - Uses `inspect.getsourcefile()` via python3; normalizes hyphens to underscores; traces `__init__.py` to `main.py` etc.
+   - `App::chot::Python` - Uses `inspect.getsourcefile()` via python3; normalizes hyphens to underscores; traces `__init__.py` to `main.py` etc. Falls back to shebang-discovered interpreters for venv packages.
    - `App::chot::Ruby` - Uses `$LOADED_FEATURES` inspection
    - `App::chot::Node` - Uses `require.resolve` with global paths
 
@@ -57,6 +59,7 @@ Auto-generated files (do not edit directly):
    ```
    `detect_pyenv_shim` resolves shims via `pyenv which` and returns both the shim and the real path.
    Also provides `get_info()` for `-i` mode with labeled output per path.
+   `man_cmd` pre-checks with `man -w` and returns empty list if no man page exists.
 
 6. **Utilities** (`lib/App/chot/Util.pm`): `is_binary()` for binary file detection.
 
@@ -67,6 +70,7 @@ Auto-generated files (do not edit directly):
 - Alias resolution skips wrapper commands (`bash`, `sh`, `env`, `exec`, `expr`) as they don't represent real command targets.
 - The `_aliases` cache is loaded once (lazy) from config.toml.
 - `get_info()` is independent of `get_path()` to avoid stderr side effects from `resolve_optex`.
+- `-m` uses `exec` (not `system`) to preserve terminal handling. Handlers' `man_cmd` returns empty list to indicate unavailability, allowing fallback to the next handler.
 
 ### Getopt::EX Integration
 
@@ -82,6 +86,8 @@ perl -Ilib script/chot -i greple   # Test info mode
 perl -Ilib script/chot -i ping     # Test optex resolution
 perl -Ilib script/chot -i 2up      # Test alias-only optex command
 perl -Ilib script/chot -l grep     # Test non-optex command
+perl -Ilib script/chot -l pandoc-embedz  # Test Homebrew venv Python tracing
+perl -Ilib script/chot -nm speedtest-z   # Test -m fallback (man → pydoc)
 ```
 
 CI runs on Perl versions: 5.24, 5.28, 5.30, 5.40. Minimum Perl version: v5.14.
@@ -162,4 +168,37 @@ $ chot -l gpty
 /Users/utashiro/.pyenv/shims/gpty
 /Users/utashiro/.pyenv/versions/3.10.2/bin/gpty
 .../gpty/gpty.py
+```
+
+### Homebrew venv Python source tracing and -m fallback (2026-02-16)
+
+**Problem 1**: `chot -l pandoc-embedz` showed the Homebrew wrapper's resolved path (`libexec/venv/bin/pandoc-embedz`) but not the Python source files. The Python handler uses `python3` to import the module, but Homebrew venv packages are not visible to the system python3.
+
+**Problem 2**: `chot -m speedtest-z` failed with "No manual entry" because the Command handler's `man` ran first via `exec`, with no fallback to Python's `pydoc`.
+
+**Problem 3**: Python's `man_cmd` used hardcoded `python3` and didn't normalize hyphens to underscores.
+
+**Solution**:
+
+1. **Shebang fallback** (`Python.pm`): Extracted `_import_source()` from `get_path()`. When the default python3 fails to import a module, iterates over `$App::chot::_found_paths` (accumulated by the main loop), reads shebang lines to find Python interpreters, and retries import with each. Also handles `#!/usr/bin/env python3` shebangs via `which` resolution.
+2. **`_found_paths` accumulation** (`chot.pm`): The main handler loop stores found paths in `$App::chot::_found_paths` after each handler, making them available to subsequent handlers.
+3. **`-m` fallback** (`chot.pm`): Changed from single `exec` to a loop over `@found_types`. Each handler's `man_cmd` returns empty list to skip (allowing fallback) or a command to `exec`. Uses `exec` (not `system`) to preserve terminal/signal handling.
+4. **`man -w` pre-check** (`Command.pm`): `man_cmd` checks man page existence with `man -w` before returning. Returns empty list if no man page, enabling fallback to the next handler.
+5. **`man_cmd` improvements** (`Python.pm`): Normalizes hyphens to underscores. Selects Python interpreter from shebang of found paths (same as `get_path` fallback).
+
+**Design note**: `system` was initially used for the `-m` loop but caused terminal issues — `system` sets SIGINT/SIGQUIT to IGNORE in the parent, breaking Ctrl-C in pagers. The `man -w` pre-check + `exec` approach avoids this entirely.
+
+**Example output**:
+```
+$ chot -l pandoc-embedz
+/opt/homebrew/bin/pandoc-embedz
+/opt/homebrew/Cellar/pandoc-embedz/.../libexec/venv/bin/pandoc-embedz
+.../pandoc_embedz/__init__.py
+.../pandoc_embedz/main.py
+
+$ chot -nm speedtest-z
+/Users/utashiro/.pyenv/versions/3.10.2/bin/python3.10 -m pydoc speedtest_z
+
+$ chot -nm pandoc-embedz
+/opt/homebrew/Cellar/pandoc-embedz/.../libexec/venv/bin/python3.12 -m pydoc pandoc_embedz
 ```

@@ -129,6 +129,15 @@ module lookup (e.g., C<pandoc-embedz> is searched as C<pandoc_embedz>).
 This follows the Python packaging convention where distribution names
 use hyphens but module names use underscores.
 
+=item B<Interpreter fallback>
+
+When the default C<python3> cannot import a module (e.g., packages
+installed only in a Homebrew venv or a specific virtual environment),
+the handler examines shebang lines of previously discovered paths to
+find the appropriate Python interpreter and retries the import.
+This enables tracing of Homebrew-installed Python commands whose
+packages are isolated in C<libexec/venv/>.
+
 =item B<Entry point resolution>
 
 When the Python module resolves to an C<__init__.py> file, the handler
@@ -153,13 +162,20 @@ If C<__init__.py> has content, both files are included.
 
 =head2 Example
 
-For a pyenv-installed Python command C<pandoc-embedz>:
+For a Homebrew-installed Python command C<pandoc-embedz>:
 
     $ chot -l pandoc-embedz
-    /Users/you/.pyenv/shims/pandoc-embedz        # pyenv shim
-    /Users/you/.pyenv/versions/.../bin/pandoc-embedz  # actual entry point
+    /opt/homebrew/bin/pandoc-embedz               # Homebrew wrapper
+    .../libexec/venv/bin/pandoc-embedz            # venv entry point
     .../pandoc_embedz/__init__.py                 # package init
     .../pandoc_embedz/main.py                     # main source
+
+For a pyenv-installed Python command:
+
+    $ chot -l gpty
+    /Users/you/.pyenv/shims/gpty                  # pyenv shim
+    /Users/you/.pyenv/versions/.../bin/gpty       # actual entry point
+    .../gpty/gpty.py                              # main source
 
 =head1 OPTIONS
 
@@ -210,6 +226,10 @@ Display manual/documentation using the appropriate tool for each language:
 - Ruby: C<ri>
 - Node.js: C<npm docs>
 - Command: C<man>
+
+If the first handler's documentation is not available (e.g., no man
+page exists), the next handler is tried automatically.  For example,
+a Python command without a man page will fall back to C<pydoc>.
 
 =item B<-N>, B<--number>, B<--no-number>
 
@@ -330,7 +350,9 @@ Perl module files (.pm and .pl files).
 =item B<App::chot::Python>
 
 Handler for Python libraries. Executes Python's C<inspect.getsourcefile()>
-function to locate Python module files.
+function to locate Python module files.  When the default C<python3>
+cannot find a module, falls back to interpreters discovered from
+shebang lines of previously found paths (e.g., Homebrew venv Python).
 
 =item B<App::chot::Ruby>
 

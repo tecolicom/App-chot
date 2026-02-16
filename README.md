@@ -114,6 +114,15 @@ source files:
     This follows the Python packaging convention where distribution names
     use hyphens but module names use underscores.
 
+- **Interpreter fallback**
+
+    When the default `python3` cannot import a module (e.g., packages
+    installed only in a Homebrew venv or a specific virtual environment),
+    the handler examines shebang lines of previously discovered paths to
+    find the appropriate Python interpreter and retries the import.
+    This enables tracing of Homebrew-installed Python commands whose
+    packages are isolated in `libexec/venv/`.
+
 - **Entry point resolution**
 
     When the Python module resolves to an `__init__.py` file, the handler
@@ -129,13 +138,20 @@ source files:
 
 ## Example
 
-For a pyenv-installed Python command `pandoc-embedz`:
+For a Homebrew-installed Python command `pandoc-embedz`:
 
     $ chot -l pandoc-embedz
-    /Users/you/.pyenv/shims/pandoc-embedz        # pyenv shim
-    /Users/you/.pyenv/versions/.../bin/pandoc-embedz  # actual entry point
+    /opt/homebrew/bin/pandoc-embedz               # Homebrew wrapper
+    .../libexec/venv/bin/pandoc-embedz            # venv entry point
     .../pandoc_embedz/__init__.py                 # package init
     .../pandoc_embedz/main.py                     # main source
+
+For a pyenv-installed Python command:
+
+    $ chot -l gpty
+    /Users/you/.pyenv/shims/gpty                  # pyenv shim
+    /Users/you/.pyenv/versions/.../bin/gpty       # actual entry point
+    .../gpty/gpty.py                              # main source
 
 # OPTIONS
 
@@ -184,6 +200,10 @@ For a pyenv-installed Python command `pandoc-embedz`:
     \- Ruby: `ri`
     \- Node.js: `npm docs`
     \- Command: `man`
+
+    If the first handler's documentation is not available (e.g., no man
+    page exists), the next handler is tried automatically.  For example,
+    a Python command without a man page will fall back to `pydoc`.
 
 - **-N**, **--number**, **--no-number**
 
@@ -300,7 +320,9 @@ implement a `get_path($app, $name)` method.
 - **App::chot::Python**
 
     Handler for Python libraries. Executes Python's `inspect.getsourcefile()`
-    function to locate Python module files.
+    function to locate Python module files.  When the default `python3`
+    cannot find a module, falls back to interpreters discovered from
+    shebang lines of previously found paths (e.g., Homebrew venv Python).
 
 - **App::chot::Ruby**
 
