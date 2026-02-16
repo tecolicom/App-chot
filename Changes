@@ -2,6 +2,16 @@ Revision history for "chot" command
 
 {{$NEXT}}
 
+1.03 2026-02-16T11:07:39Z
+
+    - Add -L (--deref) option to dereference symlinks with -ll
+    - Trace Python source files in Homebrew venv via shebang fallback
+    - Fall back to pydoc when man page is not available with -m
+    - Pre-check man page existence with man -w before exec
+    - Normalize hyphens to underscores in Python man_cmd
+    - Relax Homebrew wrapper regex to match broader exec patterns
+    - Update manual: POD formatting, accuracy, and new examples
+
 1.02 2026-02-07T05:49:07Z
 
     - Fix detect_optex to not match optex command itself
