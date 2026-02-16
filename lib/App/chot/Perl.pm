@@ -1,22 +1,34 @@
 package App::chot::Perl;
 use v5.14;
 use warnings;
+
+use parent 'App::chot::Handler';
+
 use Digest::MD5;
 
-my $DEBUG;
-
+#
+# Use perldoc -F to show documentation for the first found Perl file.
+# Retrieves this handler's own paths via context->paths_for('Perl'),
+# avoiding the former bug where $found[0] could be another handler's path.
+#
 sub man_cmd {
-    my($app, $name, $path) = @_;
-    return ('perldoc', '-F', $path);
+    my $self = shift;
+    my @paths = $self->context->paths_for('Perl');
+    return unless @paths;
+    return ('perldoc', '-F', $paths[0]);
 }
 
+#
+# Search @INC and Homebrew lib paths for .pm/.pl files.
+# Deduplicates by content hash to avoid showing identical files
+# installed in multiple locations.
+#
 sub get_path {
-    my $app  = shift;
-    my $name = shift;
-    $DEBUG = $app->debug;
+    my $self = shift;
+    my($app, $name) = ($self->app, $self->name);
 
     my @libs = grep { $app->valid($_) } ( @INC, homebrew_perl_libs() );
-    warn "  Searching in " . scalar(@libs) . " directories\n" if $DEBUG;
+    warn "  Searching in " . scalar(@libs) . " directories\n" if $self->debug;
 
     my @found =
     grep { -f $_ and -r $_ }
@@ -24,7 +36,7 @@ sub get_path {
     map  { ( "$_/$name", "$_/$name.pm", "$_/$name.pl" ) }
     @libs;
 
-    warn "  Found: @found\n" if $DEBUG && @found;
+    warn "  Found: @found\n" if $self->debug && @found;
 
     # Deduplicate files with identical content
     my %seen;
@@ -37,6 +49,9 @@ sub get_path {
     return @found;
 }
 
+#
+# Pure function: find Homebrew-installed Perl lib directories.
+#
 sub homebrew_perl_libs {
     my $prefix = $ENV{HOMEBREW_PREFIX}
               // (-d '/opt/homebrew' ? '/opt/homebrew' : undef)

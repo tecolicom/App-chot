@@ -32,20 +32,32 @@ Auto-generated files (do not edit directly):
 
 2. **Core Module** (`lib/App/chot.pm`):
    - `Getopt::EX::Hashed` for option parsing with assignable accessors
-   - Dynamically loads handler modules based on `--type` option
+   - Loads handler classes and instantiates handler objects once per `run()`
+   - All handlers share a `Context` object for cross-handler data passing
    - Three output modes: pager display (default), `-l` (list paths), `-i` (info/trace)
    - Filters optex symlinks from pager display via `detect_optex()`
-   - Accumulates found paths in `$App::chot::_found_paths` for cross-handler use (e.g., Python shebang fallback)
    - `-m` mode tries each handler's `man_cmd` in order; handlers return empty list to skip
 
-3. **Handler Modules** (each implements `get_path($app, $name)`):
+3. **Handler Base Class** (`lib/App/chot/Handler.pm`):
+   - Base class for all handler modules, providing `new()` and lvalue accessors (`app`, `name`, `context`)
+   - `debug` shortcut delegates to `$self->app->debug`
+   - Defines handler contract: `get_path()` (required), `get_info()` (optional), `man_cmd()` (optional)
+   - Default `get_path()` returns empty list
+
+4. **Context Object** (`lib/App/chot/Context.pm`):
+   - Shared state for inter-handler data passing (replaces former `$App::chot::_found_paths` global)
+   - `add_result($type, @paths)` accumulates results as handlers find paths
+   - `found_paths` / `found_types` provide aggregated data across all handlers
+   - `paths_for($type)` returns a specific handler's results (e.g., Perl handler's `man_cmd` uses `paths_for('Perl')` to get its own paths)
+
+5. **Handler Modules** (each subclasses `App::chot::Handler`):
    - `App::chot::Command` - Searches `$PATH`, resolves optex/Homebrew/pyenv
    - `App::chot::Perl` - Searches `@INC` for .pm/.pl files
-   - `App::chot::Python` - Uses `inspect.getsourcefile()` via python3; normalizes hyphens to underscores; traces `__init__.py` to `main.py` etc. Falls back to shebang-discovered interpreters for venv packages.
+   - `App::chot::Python` - Uses `inspect.getsourcefile()` via python3; normalizes hyphens to underscores; traces `__init__.py` to `main.py` etc. Falls back to shebang-discovered interpreters via context.
    - `App::chot::Ruby` - Uses `$LOADED_FEATURES` inspection
    - `App::chot::Node` - Uses `require.resolve` with global paths
 
-4. **App::chot::Optex** (`lib/App/chot/Optex.pm`):
+6. **App::chot::Optex** (`lib/App/chot/Optex.pm`):
    - `detect_optex($path)` - Checks if path is a symlink to the optex binary
    - `resolve_optex($app, $name, $path)` - Resolves optex commands:
      - Loads aliases from `~/.optex.d/config.toml` (via TOML module, with simple fallback parser)
@@ -53,7 +65,7 @@ Auto-generated files (do not edit directly):
      - Locates `~/.optex.d/NAME.rc` files
    - Prints optex/config/alias info to stderr for visibility
 
-5. **App::chot::Command** resolution pipeline (`get_path`):
+7. **App::chot::Command** resolution pipeline (`get_path`):
    ```
    PATH search -> resolve_optex_command -> detect_pyenv_shim -> resolve_homebrew_wrapper -> _uniq
    ```
@@ -61,10 +73,14 @@ Auto-generated files (do not edit directly):
    Also provides `get_info()` for `-i` mode with labeled output per path.
    `man_cmd` pre-checks with `man -w` and returns empty list if no man page exists.
 
-6. **Utilities** (`lib/App/chot/Util.pm`): `is_binary()` for binary file detection.
+8. **Utilities** (`lib/App/chot/Util.pm`): `is_binary()` for binary file detection.
 
 ### Key Design Decisions
 
+- **Handler objects**: Each handler is instantiated once per `run()` with `$app`, `$name`, `$context`. Handler methods access these via `$self->app`, `$self->name`, `$self->context` (lvalue accessors). No module-level state variables (`$DEBUG`, `$RAW`, etc.).
+- **Context over globals**: Inter-handler data sharing uses `App::chot::Context` instead of package globals. `paths_for($type)` provides per-handler results, fixing the former `$found[0]` context bug in `man_cmd`.
+- **Interpreter caching**: Language runtimes (`python3`, `ruby`, `node`) are cached per handler instance (`$self->{_python}` etc.) rather than in module-level variables.
+- **Pure functions preserved**: Stateless utility functions (`_uniq`, `_file_type`, `_import_source`, `homebrew_prefix`, etc.) remain as plain subs, not methods.
 - `--skip` default is empty (was `.optex.d/bin`). Optex symlinks are now resolved rather than skipped.
 - Optex symlinks are included in `-l` output but filtered before pager display.
 - Alias resolution skips wrapper commands (`bash`, `sh`, `env`, `exec`, `expr`) as they don't represent real command targets.
@@ -180,8 +196,8 @@ $ chot -l gpty
 
 **Solution**:
 
-1. **Shebang fallback** (`Python.pm`): Extracted `_import_source()` from `get_path()`. When the default python3 fails to import a module, iterates over `$App::chot::_found_paths` (accumulated by the main loop), reads shebang lines to find Python interpreters, and retries import with each. Also handles `#!/usr/bin/env python3` shebangs via `which` resolution.
-2. **`_found_paths` accumulation** (`chot.pm`): The main handler loop stores found paths in `$App::chot::_found_paths` after each handler, making them available to subsequent handlers.
+1. **Shebang fallback** (`Python.pm`): Extracted `_import_source()` from `get_path()`. When the default python3 fails to import a module, iterates over `$self->context->found_paths` (accumulated by the main loop), reads shebang lines to find Python interpreters, and retries import with each. Also handles `#!/usr/bin/env python3` shebangs via `which` resolution.
+2. **`found_paths` accumulation** (`chot.pm`): The main handler loop stores found paths in the shared `Context` object after each handler, making them available to subsequent handlers.
 3. **`-m` fallback** (`chot.pm`): Changed from single `exec` to a loop over `@found_types`. Each handler's `man_cmd` returns empty list to skip (allowing fallback) or a command to `exec`. Uses `exec` (not `system`) to preserve terminal/signal handling.
 4. **`man -w` pre-check** (`Command.pm`): `man_cmd` checks man page existence with `man -w` before returning. Returns empty list if no man page, enabling fallback to the next handler.
 5. **`man_cmd` improvements** (`Python.pm`): Normalizes hyphens to underscores. Selects Python interpreter from shebang of found paths (same as `get_path` fallback).
@@ -202,3 +218,28 @@ $ chot -nm speedtest-z
 $ chot -nm pandoc-embedz
 /opt/homebrew/Cellar/pandoc-embedz/.../libexec/venv/bin/python3.12 -m pydoc pandoc_embedz
 ```
+
+### Handler architecture refactoring (2026-02-16)
+
+**Problem**: The handler system had several structural issues that would make adding new handlers difficult:
+
+1. **Implicit interface**: No base class or documentation. Handlers were called via `no strict 'refs'` + symbolic references (`&{"$handler\::get_path"}`).
+2. **Three dispatch loops**: `-i` mode, main loop, and `-m` mode each had separate handler iteration with `no strict 'refs'`, requiring 3 changes for any new optional method.
+3. **Global state for inter-handler data**: `$App::chot::_found_paths` was an undeclared package global read only by Python.pm.
+4. **Module-level state**: All handlers stored `$DEBUG` in `my` variables, initialized at `get_path` entry. Other methods (`man_cmd`, `get_info`) had no guarantee of initialization.
+5. **`man_cmd` context bug**: `-m` mode passed `$found[0]` (first path across all handlers) to `man_cmd`, but this could be another handler's path.
+
+**Solution**:
+
+1. **`App::chot::Handler` base class**: Provides `new()`, lvalue accessors (`app`, `name`, `context`), `debug` shortcut. Defines handler contract: `get_path` (required), `get_info`/`man_cmd` (optional).
+2. **`App::chot::Context` object**: Replaces `$_found_paths` global. Accumulates results via `add_result()`, provides `found_paths`/`found_types` (aggregate) and `paths_for($type)` (per-handler).
+3. **Unified dispatch** (`chot.pm`): Handlers are loaded and instantiated once, then reused across all three modes. `$h->can('method')` replaces `defined &{"$handler\::method"}`. All `no strict 'refs'` eliminated.
+4. **Handler methods**: `get_path`, `get_info`, `man_cmd` receive `$self` instead of `($app, $name)`. State accessed via `$self->debug`, `$self->app->raw`, etc.
+5. **Instance-level caching**: `$PYTHON`/`$RUBY`/`$NODE` module variables replaced with `$self->{_python}`/`$self->{_ruby}`/`$self->{_node}`.
+6. **`man_cmd` context fix**: Perl.pm uses `$self->context->paths_for('Perl')` to reliably get its own paths.
+
+**Design decisions**:
+- Pure utility functions (`_uniq`, `_file_type`, `_import_source`, `homebrew_prefix`, etc.) remain as plain subs, not methods. Only functions that need `$self` (for debug/raw/context) are methods.
+- `_detect_pyenv_shim` and `_resolve_homebrew_wrapper` in Command.pm became methods because they need `$self->debug` and `$self->app->raw`.
+- `_import_source` in Python.pm takes `$debug` as a parameter rather than becoming a method, since it's a stateless function apart from debug output.
+- No external dependencies added — only `parent` pragma (core module).
