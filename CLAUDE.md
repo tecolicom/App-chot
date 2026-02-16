@@ -92,7 +92,7 @@ perl -Ilib script/chot -nm speedtest-z   # Test -m fallback (man → pydoc)
 
 CI runs on Perl versions: 5.24, 5.28, 5.30, 5.40. Minimum Perl version: v5.14.
 
-## Development Notes (2026-02-02)
+## Development Notes
 
 ### optex command tracing (v1.00)
 
