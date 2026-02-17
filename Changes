@@ -2,6 +2,11 @@ Revision history for "chot" command
 
 {{$NEXT}}
 
+1.04 2026-02-17T23:32:42Z
+
+    - Add -C option for multi-column display using nup
+    - Refactor internal architecture with Finder base class and Found object
+
 1.03 2026-02-16T11:07:39Z
 
     - Add -L (--deref) option to dereference symlinks with -ll
