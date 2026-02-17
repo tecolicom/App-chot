@@ -23,6 +23,7 @@ Version 1.03
        -N   --[no-]number   Line number display (default: off)
        -r   --raw           Don't resolve symlinks/wrappers
        -v   --version       Print version
+       -C   --column[=#]    Use nup for multi-column display
        -p   --pager=#       Specify pager command
        -t   --type=#        Specify handler (Command:Perl:Python:Ruby:Node)
             --py            Shortcut for --type Python
@@ -227,6 +228,17 @@ For a pyenv-installed Python command:
 
     Display version information and exit.
 
+- **-C**, **--column**\[=_N_\]
+
+    Use [nup](https://metacpan.org/pod/App%3A%3Anup) for multi-column display.
+    If _N_ is specified, it is passed to `nup` as the number of columns.
+
+        chot -C greple           # multi-column with default layout
+        chot -C2 greple          # 2-column layout
+
+    The source files are shown with syntax highlighting and formatted
+    into multi-column pages, equivalent to `nup chot greple`.
+
 - **-p**, **--pager** _command_
 
     Specify the pager command to use for displaying files.
@@ -383,6 +395,10 @@ implement a `get_path($app, $name)` method.
     # Show documentation with fallback (man → pydoc)
     chot -m speedtest-z
 
+    # Multi-column display using nup
+    chot -C greple
+    chot -C2 greple
+
     # Use a custom pager
     chot --pager "vim -R" List::Util
 
@@ -437,7 +453,7 @@ Kazumasa Utashiro
 
 # LICENSE
 
-Copyright 1992-2026 Kazumasa Utashiro.
+Copyright 2021-2026 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

@@ -42,6 +42,7 @@
       },
       "runtime" : {
          "requires" : {
+            "App::nup" : "0",
             "Command::Run" : "0",
             "Encode" : "0",
             "Getopt::EX::Hashed" : "1.05",

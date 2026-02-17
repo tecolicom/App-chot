@@ -37,6 +37,7 @@ Auto-generated files (do not edit directly):
    - Three output modes: pager display (default), `-l` (list paths), `-i` (info/trace)
    - Filters optex symlinks from pager display via `detect_optex()`
    - `-m` mode tries each finder's `man_cmd` in order; finders return empty list to skip
+   - `-C` option wraps the pager with `nup -e` for multi-column display; optional column count. Uses `nup -e` (command mode) because passing files directly to nup triggers parallel mode.
 
 3. **Finder Base Class** (`lib/App/chot/Finder.pm`):
    - Base class for all finder modules, providing `new()` and lvalue accessors (`app`, `name`, `found`)
@@ -104,6 +105,8 @@ perl -Ilib script/chot -i 2up      # Test alias-only optex command
 perl -Ilib script/chot -l grep     # Test non-optex command
 perl -Ilib script/chot -l pandoc-embedz  # Test Homebrew venv Python tracing
 perl -Ilib script/chot -nm speedtest-z   # Test -m fallback (man → pydoc)
+perl -Ilib script/chot -n -C greple     # Test -C (nup pager)
+perl -Ilib script/chot -n -C2 greple    # Test -C with column count
 ```
 
 CI runs on Perl versions: 5.24, 5.28, 5.30, 5.40. Minimum Perl version: v5.14.
@@ -243,3 +246,11 @@ $ chot -nm pandoc-embedz
 - `_detect_pyenv_shim` and `_resolve_homebrew_wrapper` in Command.pm became methods because they need `$self->debug` and `$self->app->raw`.
 - `_import_source` in Python.pm takes `$debug` as a parameter rather than becoming a method, since it's a stateless function apart from debug output.
 - No external dependencies added — only `parent` pragma (core module).
+
+### `-C` option: nup multi-column display (2026-02-18)
+
+Added `-C` option to display source files with syntax highlighting in multi-column pages using `nup`. Equivalent to `nup chot <name>`. Optional column count: `-C2` for 2-column layout.
+
+**Implementation notes**:
+- Uses `nup -e` to wrap the pager command. Passing files directly to nup would show each file in a separate column (parallel mode) instead of paginating them together.
+- Strips `--force-colorization` from bat options. nup's built-in bat alias adds `--color=always`, which conflicts with `--force-colorization` in bat.

@@ -31,6 +31,7 @@ use Getopt::EX::Hashed; {
     has number  => ' N !   ' , default => 0 ;
     has version => ' v     ' , action => sub { say "Version: $VERSION"; exit } ;
     has pager   => ' p =s  ' ;
+    has column  => ' C :i  ' ;
     has suffix  => '   =s  ' , default => [ qw( .pm ) ] ;
     has type    => ' t =s  ' , default => 'Command:Perl:Python:Ruby:Node' ;
     has py      => '       ' , action => sub { $_->type('Python') } ;
@@ -167,6 +168,10 @@ sub run {
 	}
     }
     my @cmd = (shellwords($pager), @pager_opts, @option, @found);
+    if (defined(my $col = $app->column)) {
+	@cmd = grep { $_ ne '--force-colorization' } @cmd;
+	unshift @cmd, 'nup', '-e', ($col ? ("-C$col") : ());
+    }
     if ($app->dryrun) {
 	say "@cmd";
 	return 0;

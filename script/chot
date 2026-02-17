@@ -32,6 +32,7 @@ Version 1.03
      -N   --[no-]number   Line number display (default: off)
      -r   --raw           Don't resolve symlinks/wrappers
      -v   --version       Print version
+     -C   --column[=#]    Use nup for multi-column display
      -p   --pager=#       Specify pager command
      -t   --type=#        Specify handler (Command:Perl:Python:Ruby:Node)
           --py            Shortcut for --type Python
@@ -253,6 +254,17 @@ Homebrew wrapper scripts to their actual executables.
 
 Display version information and exit.
 
+=item B<-C>, B<--column>[=I<N>]
+
+Use L<nup|App::nup> for multi-column display.
+If I<N> is specified, it is passed to C<nup> as the number of columns.
+
+    chot -C greple           # multi-column with default layout
+    chot -C2 greple          # 2-column layout
+
+The source files are shown with syntax highlighting and formatted
+into multi-column pages, equivalent to C<nup chot greple>.
+
 =item B<-p>, B<--pager> I<command>
 
 Specify the pager command to use for displaying files.
@@ -415,6 +427,10 @@ Documentation is opened via C<npm docs>.
     # Show documentation with fallback (man → pydoc)
     chot -m speedtest-z
 
+    # Multi-column display using nup
+    chot -C greple
+    chot -C2 greple
+
     # Use a custom pager
     chot --pager "vim -R" List::Util
 
@@ -473,7 +489,7 @@ Kazumasa Utashiro
 
 =head1 LICENSE
 
-Copyright 1992-2026 Kazumasa Utashiro.
+Copyright 2021-2026 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
